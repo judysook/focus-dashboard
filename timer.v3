@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>PM Focus Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f13;--s1:rgba(255,255,255,.04);--s2:rgba(255,255,255,.08);--s3:rgba(255,255,255,.14);
+  --b1:rgba(255,255,255,.09);--b2:rgba(255,255,255,.17);
+  --t1:#f0eee8;--t2:#b0adc0;--t3:#706d80;
+  --ac:#c8ff57;--ac2:#57ffc8;--ac3:#ff6b6b;--ac4:#ffb347;--ac5:#b47fff;
+  --fg:rgba(200,255,87,.14);--bg2:rgba(87,255,200,.14);
+  --blur:blur(18px) saturate(160%);
+  --fm:'DM Mono',monospace;--fb:'Pretendard',sans-serif;
+  --r:14px;--rs:9px;
+}
+.light{
+  --bg:#f0eee8;--s1:rgba(255,255,255,.6);--s2:rgba(255,255,255,.8);--s3:rgba(255,255,255,.96);
+  --b1:rgba(0,0,0,.07);--b2:rgba(0,0,0,.14);
+  --t1:#1a1820;--t2:#5c5869;--t3:#9b98a8;
+}
+html,body,#root{width:100%;height:100%;font-family:var(--fb);background:var(--bg);color:var(--t1);transition:background .3s,color .3s;overflow:hidden}
+.shell{width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── TOP BAR ── */
+.topbar{
+  display:flex;align-items:center;gap:8px;flex-wrap:nowrap;
+  padding:0 12px;height:46px;min-height:46px;
+  background:rgba(15,15,19,.92);backdrop-filter:var(--blur);
+  border-bottom:1px solid var(--b1);z-index:100;flex-shrink:0;
+}
+.light .topbar{background:rgba(240,238,232,.92)}
+.tb-logo{font-size:11px;font-weight:700;color:var(--t3);letter-spacing:1.5px;flex-shrink:0}
+.tb-timer{font-family:var(--fm);font-size:14px;font-weight:500;letter-spacing:1px;color:var(--ac);flex-shrink:0;cursor:pointer}
+.tb-timer:hover{opacity:.8}
+.tb-timer.brk{color:var(--ac2)}
+.tb-mode{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;flex-shrink:0}
+.tb-sep{width:1px;height:18px;background:var(--b2);flex-shrink:0}
+.tb-play{background:none;border:none;cursor:pointer;color:var(--t2);padding:3px;border-radius:5px;display:flex;align-items:center;flex-shrink:0;transition:color .2s}
+.tb-play:hover{color:var(--t1)}
+.tb-input-wrap{flex:1;min-width:0}
+
+/* Desktop topbar input */
+.tb-input{
+  display:flex;align-items:center;gap:6px;
+  background:var(--s2);border:1px solid var(--b1);border-radius:7px;
+  padding:0 9px;height:28px;transition:border-color .2s;
+}
+.tb-input:focus-within{border-color:var(--ac)}
+.tb-input input{flex:1;min-width:0;background:transparent;border:none;outline:none;font-size:12px;color:var(--t1);font-family:var(--fb)}
+.tb-input input::placeholder{color:var(--t2);opacity:1}
+
+/* Mobile topbar input — hidden on desktop */
+.tb-mobile-input{display:none}
+@media(max-width:680px){
+  .tb-input{display:none}
+  .tb-mobile-input{
+    display:flex;flex-direction:column;gap:0;
+    background:var(--s2);border:1px solid var(--b1);border-radius:7px;
+    padding:4px 9px;transition:border-color .2s;
+  }
+  .tb-mobile-input:focus-within{border-color:var(--ac)}
+  .tb-mobile-input textarea{
+    width:100%;background:transparent;border:none;outline:none;
+    font-size:13px;color:var(--t1);font-family:var(--fb);
+    resize:none;min-height:32px;max-height:80px;line-height:1.4;
+  }
+  .tb-mobile-input textarea::placeholder{color:var(--t2);opacity:1}
+  .tb-mobile-hint{font-size:9px;color:var(--t3);text-align:right;padding-top:1px}
+}
+
+.ibt{background:none;border:none;cursor:pointer;color:var(--t3);padding:3px;border-radius:5px;display:flex;align-items:center;justify-content:center;transition:color .2s,background .2s;flex-shrink:0}
+.ibt:hover{color:var(--t1);background:var(--s3)}
+.ibt.red:hover{color:var(--ac3)}
+.ibt.gold:hover{color:var(--ac4)}
+.notif-btn{font-size:10px;padding:3px 7px;border-radius:6px;border:1px solid var(--b2);background:var(--s2);color:var(--t2);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s}
+.notif-btn:hover{background:var(--s3)}
+.notif-btn.ok{border-color:rgba(200,255,87,.3);color:var(--ac);background:rgba(200,255,87,.06)}
+
+/* ── SCROLL ── */
+.scroll-area{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.scroll-area::-webkit-scrollbar{width:3px}
+.scroll-area::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+
+/* ── GRID ── */
+.grid{display:grid;grid-template-columns:300px 1fr;gap:12px;padding:12px;min-height:100%}
+@media(max-width:680px){.grid{grid-template-columns:1fr;min-height:auto}}
+
+/* ── CARD ── */
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);backdrop-filter:var(--blur);padding:16px;position:relative;overflow:hidden;transition:background .3s,border .3s}
+.card-timer{display:flex;flex-direction:column}
+.card-inbox{display:flex;flex-direction:column}
+
+/* ── FOCUS MODE SELECTOR ── */
+.focus-modes{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;align-items:center}
+.fm-btn{font-size:10px;font-weight:600;letter-spacing:.5px;padding:4px 10px;border-radius:20px;border:1px solid var(--b2);cursor:pointer;transition:all .2s;color:var(--t2);background:transparent;white-space:nowrap}
+.fm-btn.active{background:var(--ac);color:#0f0f13;border-color:var(--ac)}
+.fm-btn.brk-active{background:var(--ac2);color:#0f0f13;border-color:var(--ac2)}
+.custom-min{width:52px;background:var(--s2);border:1px solid var(--b1);border-radius:7px;padding:3px 7px;font-size:11px;color:var(--t1);font-family:var(--fm);outline:none;text-align:center}
+.custom-min:focus{border-color:var(--ac)}
+.custom-min::placeholder{color:var(--t3)}
+
+/* ── RING ── */
+.ring-wrap{display:flex;justify-content:center;align-items:center;margin:4px 0 10px;position:relative}
+.ring-svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--b2);stroke-width:5}
+.ring-fg{fill:none;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke .5s}
+.ring-time{position:absolute;font-family:var(--fm);font-size:28px;font-weight:500;letter-spacing:2px;line-height:1}
+.ring-sub{position:absolute;top:61%;left:50%;transform:translateX(-50%);font-size:9px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap}
+
+/* ── TIMER CTRL ── */
+.tctrl{display:flex;justify-content:center;gap:8px;margin-bottom:10px}
+.tcb{width:40px;height:40px;border-radius:50%;border:1px solid var(--b2);background:var(--s2);color:var(--t1);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.tcb.primary{width:48px;height:48px;background:var(--ac);color:#0f0f13;border-color:var(--ac);box-shadow:0 0 20px var(--fg)}
+.tcb.primary.brk{background:var(--ac2);border-color:var(--ac2);box-shadow:0 0 20px var(--bg2)}
+.tcb:hover:not(.primary){background:var(--s3)}
+.tcb.primary:hover{opacity:.87}
+
+/* mini popup btn */
+.popup-btn{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t3);background:none;border:none;cursor:pointer;padding:3px 6px;border-radius:6px;transition:all .2s;margin:0 auto 8px}
+.popup-btn:hover{color:var(--t1);background:var(--s2)}
+
+/* ── STATS ── */
+.stats{display:flex;justify-content:space-between;padding:10px 0 0;border-top:1px solid var(--b1);margin-top:auto}
+.stat{text-align:center}
+.sv{font-family:var(--fm);font-size:15px;font-weight:500;color:var(--ac)}
+.sv.b{color:var(--ac2)}.sv.r{color:var(--ac3)}.sv.o{color:var(--ac4)}
+.sl{font-size:8px;color:var(--t3);letter-spacing:.7px;text-transform:uppercase;margin-top:1px}
+
+/* ── DAILY ROW ── */
+.daily-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:8px 10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);flex-wrap:wrap;gap:6px}
+.daily-date{font-family:var(--fm);font-size:9px;color:var(--t3)}
+.daily-date b{color:var(--t2);font-weight:500}
+.auto-badge{font-size:8px;padding:2px 5px;border-radius:5px;background:rgba(255,179,71,.1);color:var(--ac4);border:1px solid rgba(255,179,71,.2)}
+.reset-btn{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:4px 9px;border-radius:7px;border:1px solid rgba(255,107,107,.3);background:rgba(255,107,107,.07);color:var(--ac3);cursor:pointer;transition:all .2s}
+.reset-btn:hover{background:rgba(255,107,107,.18);border-color:var(--ac3)}
+
+/* ── INBOX ── */
+.inbox-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px}
+.inbox-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2)}
+.inbox-cnt{font-family:var(--fm);font-size:10px;color:var(--t3);background:var(--s2);padding:2px 7px;border-radius:9px;border:1px solid var(--b1)}
+.inbox-iw{display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);padding:8px 11px;margin-bottom:10px;transition:border-color .2s,box-shadow .2s}
+.inbox-iw:focus-within{border-color:var(--ac);box-shadow:0 0 0 3px rgba(200,255,87,.07)}
+.inbox-inp{flex:1;background:transparent;border:none;outline:none;font-size:13px;color:var(--t1);font-family:var(--fb)}
+.inbox-inp::placeholder{color:var(--t2);opacity:1}
+
+/* ── FILTER TABS ── */
+.filter-tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.ftab{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;border:1px solid var(--b1);background:transparent;color:var(--t3);cursor:pointer;transition:all .15s;white-space:nowrap}
+.ftab:hover{background:var(--s2);color:var(--t2)}
+.ftab.active{background:var(--s3);border-color:var(--b2);color:var(--t1)}
+.ftab.active.idea   {background:rgba(200,255,87,.12); color:var(--ac); border-color:rgba(200,255,87,.3)}
+.ftab.active.todo   {background:rgba(87,255,200,.12); color:var(--ac2);border-color:rgba(87,255,200,.3)}
+.ftab.active.random {background:rgba(255,107,107,.12);color:var(--ac3);border-color:rgba(255,107,107,.3)}
+.ftab.active.meeting{background:rgba(255,179,71,.12); color:var(--ac4);border-color:rgba(255,179,71,.3)}
+.ftab.active.insight{background:rgba(180,127,255,.12);color:var(--ac5);border-color:rgba(180,127,255,.3)}
+.ftab.active.research{background:rgba(87,200,255,.12);color:#57c8ff; border-color:rgba(87,200,255,.3)}
+.ftab.active.none   {background:rgba(160,157,176,.12);color:var(--t2);border-color:rgba(160,157,176,.3)}
+
+/* ── LOCKED ── */
+.inbox-locked{position:absolute;inset:0;background:rgba(15,15,19,.72);backdrop-filter:blur(5px);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;z-index:10}
+.light .inbox-locked{background:rgba(240,238,232,.78)}
+
+/* ── CAT MGR ── */
+.cat-mgr{margin-bottom:8px}
+.cat-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.cat-lbl{font-size:10px;color:var(--t3);letter-spacing:1px;text-transform:uppercase}
+.cat-add-row{display:flex;gap:5px;margin-top:5px}
+.cat-inp{flex:1;background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--t1);font-family:var(--fb);outline:none}
+.cat-inp::placeholder{color:var(--t2)}
+.cat-inp:focus{border-color:var(--b2)}
+.cat-add-btn{padding:4px 10px;border-radius:6px;background:var(--ac);color:#0f0f13;border:none;font-size:10px;font-weight:700;cursor:pointer}
+.cat-chips{display:flex;flex-wrap:wrap;gap:4px}
+.cat-chip{display:inline-flex;align-items:center;gap:3px;font-size:9px;padding:2px 6px 2px 7px;border-radius:8px;font-weight:600}
+.cat-del{background:none;border:none;color:currentColor;cursor:pointer;font-size:11px;line-height:1;padding:0;opacity:.6}
+.cat-del:hover{opacity:1}
+
+/* ── ITEMS ── */
+.ilist{display:flex;flex-direction:column;gap:4px;overflow-y:auto;flex:1;padding-right:1px;min-height:0}
+.ilist::-webkit-scrollbar{width:2px}
+.ilist::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.ii{display:flex;align-items:flex-start;gap:8px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);padding:8px 10px;transition:border-color .2s;animation:sIn .22s ease}
+@keyframes sIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.ii.done{opacity:.35;border-color:transparent}
+.ii.pout{animation:pOut .28s ease forwards}
+@keyframes pOut{to{opacity:0;transform:scale(.87) translateX(16px)}}
+.icheck{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--b2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;margin-top:1px}
+.icheck.ck{background:var(--ac2);border-color:var(--ac2);color:#0f0f13}
+.i-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.it{font-size:12px;color:var(--t1);line-height:1.45;word-break:break-word;cursor:pointer}
+.ii.done .it{text-decoration:line-through;color:var(--t3)}
+.iedit{width:100%;background:var(--s3);border:1px solid var(--ac);border-radius:5px;padding:3px 7px;font-size:12px;color:var(--t1);font-family:var(--fb);outline:none}
+.itags{display:flex;flex-wrap:wrap;gap:3px;align-items:center}
+.tag{font-size:9px;padding:1px 6px;border-radius:5px;cursor:pointer;border:1px solid transparent;transition:all .15s;font-weight:600;white-space:nowrap}
+.tag.idea    {background:rgba(200,255,87,.1); color:var(--ac); border-color:rgba(200,255,87,.2)}
+.tag.todo    {background:rgba(87,255,200,.1); color:var(--ac2);border-color:rgba(87,255,200,.2)}
+.tag.random  {background:rgba(255,107,107,.1);color:var(--ac3);border-color:rgba(255,107,107,.2)}
+.tag.meeting {background:rgba(255,179,71,.1); color:var(--ac4);border-color:rgba(255,179,71,.2)}
+.tag.insight {background:rgba(180,127,255,.1);color:var(--ac5);border-color:rgba(180,127,255,.2)}
+.tag.research{background:rgba(87,200,255,.1); color:#57c8ff; border-color:rgba(87,200,255,.2)}
+.tag.unset   {background:var(--s3);color:var(--t3)}
+.idel{color:var(--t3);cursor:pointer;background:none;border:none;padding:2px;border-radius:4px;display:flex;align-items:center;transition:color .15s;flex-shrink:0;margin-top:1px}
+.idel:hover{color:var(--ac3)}
+
+/* ── HISTORY MODAL ── */
+.mbk{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center;animation:fIn .18s ease;padding:12px}
+@keyframes fIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--bg);border:1px solid var(--b2);border-radius:18px;width:100%;max-width:540px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;animation:sUp .22s ease}
+@keyframes sUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.mhd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 11px;border-bottom:1px solid var(--b1)}
+.mtitle{font-size:13px;font-weight:700;letter-spacing:1px}
+.mbody{overflow-y:auto;flex:1;padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.mbody::-webkit-scrollbar{width:3px}
+.mbody::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+.hday{border:1px solid var(--b1);border-radius:var(--rs);overflow:hidden}
+.hdhd{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--s2);cursor:pointer;user-select:none;flex-wrap:wrap;gap:5px}
+.hddate{font-family:var(--fm);font-size:11px;font-weight:500;color:var(--t2)}
+.hdstats{display:flex;gap:5px;flex-wrap:wrap}
+.hchip{font-size:9px;padding:2px 6px;border-radius:5px;font-weight:600}
+.hchip.f{background:rgba(200,255,87,.1);color:var(--ac)}
+.hchip.b{background:rgba(87,255,200,.1);color:var(--ac2)}
+.hchip.i{background:rgba(255,179,71,.1);color:var(--ac4)}
+.hitems{padding:8px 12px;display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--b1)}
+.hirow{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)}
+.hidone{color:var(--t3);text-decoration:line-through}
+.empty-h{text-align:center;padding:32px 0;color:var(--t3);font-size:12px;line-height:1.9}
+
+/* ── ONBOARDING MODAL ── */
+.onboard-bk{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;animation:fIn .3s ease}
+.onboard{background:var(--bg);border:1px solid var(--b2);border-radius:20px;width:100%;max-width:460px;padding:28px 26px 22px;animation:sUp .3s ease}
+.ob-logo{font-size:32px;margin-bottom:10px;text-align:center}
+.ob-title{font-size:16px;font-weight:700;text-align:center;margin-bottom:4px}
+.ob-sub{font-size:11px;color:var(--t3);text-align:center;margin-bottom:20px}
+.ob-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:22px}
+.ob-step{display:flex;align-items:flex-start;gap:10px;background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:11px 13px}
+.ob-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.ob-text{font-size:12px;line-height:1.6;color:var(--t2)}
+.ob-text b{color:var(--t1)}
+.ob-start{width:100%;padding:11px;border-radius:11px;background:var(--ac);color:#0f0f13;border:none;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:opacity .2s}
+.ob-start:hover{opacity:.88}
+
+/* ── CONFIRM ── */
+.cfbk{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;padding:12px}
+.cfov{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px)}
+.cfcard{position:relative;background:var(--bg);border:1px solid var(--b2);border-radius:14px;padding:22px 24px;width:100%;max-width:320px;text-align:center;animation:sUp .2s ease}
+.cfico{font-size:28px;margin-bottom:7px}
+.cftit{font-size:13px;font-weight:700;margin-bottom:5px}
+.cfsub{font-size:11px;color:var(--t3);margin-bottom:16px;line-height:1.7;white-space:pre-line}
+.cfbtns{display:flex;gap:8px;justify-content:center}
+.cfb{padding:7px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid var(--b2)}
+.cfb.cancel{background:var(--s2);color:var(--t2)}
+.cfb.cancel:hover{background:var(--s3)}
+.cfb.danger{background:var(--ac3);color:#fff;border-color:var(--ac3)}
+.cfb.danger:hover{opacity:.85}
+
+/* ── FX ── */
+#cv{position:fixed;inset:0;pointer-events:none;z-index:9999}
+.rtoast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--ac);color:#0f0f13;padding:8px 18px;border-radius:40px;font-size:11px;font-weight:700;letter-spacing:.4px;opacity:0;pointer-events:none;z-index:9998;transition:all .35s;white-space:nowrap;max-width:90vw;text-align:center}
+.rtoast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.sparkle{position:fixed;pointer-events:none;z-index:9997;width:36px;height:36px;animation:spPop .45s ease forwards}
+@keyframes spPop{0%{opacity:1;transform:scale(.5)}60%{opacity:1;transform:scale(1.4)}100%{opacity:0;transform:scale(1.8)}}
+.shell.is-focus .card-timer::after{content:'';position:absolute;inset:-1px;border-radius:var(--r);border:1px solid var(--ac);opacity:.35;animation:gp 2.2s ease-in-out infinite;pointer-events:none}
+@keyframes gp{0%,100%{opacity:.15}50%{opacity:.55}}
+.shell.is-break .card-timer{border-color:rgba(87,255,200,.2)}
+.flash{animation:fl .55s ease}
+@keyframes fl{0%{opacity:0;transform:scale(.97)}60%{opacity:1;transform:scale(1.01)}100%{transform:scale(1)}}
+.compact .grid{display:none!important}
+.compact .topbar{border-bottom:none}
+.empty-inbox{text-align:center;padding:20px 0;color:var(--t3);font-size:12px;line-height:1.8}
+
+/* mobile tweaks */
+@media(max-width:680px){
+  .topbar{height:auto;min-height:46px;padding:6px 10px;flex-wrap:wrap;gap:6px}
+  .tb-input-wrap{order:10;width:100%}
+  .grid{padding:10px;gap:10px}
+  .card{padding:14px}
+}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="rtoast" class="rtoast"></div>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback,useMemo}=React;
+
+/* ── STORAGE ── */
+const LS={
+  get:(k,fb)=>{try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):fb}catch{return fb}},
+  set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+};
+
+/* ── DATE ── */
+function todayStr(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function fmtKo(s){if(!s)return'';const[y,m,d]=s.split('-');const day=new Date(+y,+m-1,+d).getDay();return`${y}.${m}.${d} (${'일월화수목금토'[day]})`}
+function fmt(sec){return`${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`}
+
+/* ── CONFETTI ── */
+function launchConfetti(){
+  const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+  cv.width=window.innerWidth;cv.height=window.innerHeight;
+  const p=Array.from({length:110},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height-cv.height,r:Math.random()*6+3,d:Math.random()*70+20,color:['#c8ff57','#57ffc8','#ff6b6b','#ffd700','#ff9fff'][Math.floor(Math.random()*5)],tilt:0,tA:0,tS:Math.random()*.1+.05,vx:Math.random()*2-1,vy:Math.random()*3+2}));
+  let fr;(function draw(){ctx.clearRect(0,0,cv.width,cv.height);p.forEach(q=>{ctx.beginPath();ctx.fillStyle=q.color;ctx.moveTo(q.x+q.tilt+q.r/3,q.y);ctx.lineTo(q.x+q.tilt,q.y+q.tilt+q.r/5);ctx.lineTo(q.x+q.r/2+q.tilt,q.y+q.d+q.tilt);ctx.lineTo(q.x+q.tilt,q.y+q.d);ctx.fill();q.y+=q.vy;q.x+=q.vx;q.tA+=q.tS;q.tilt=Math.sin(q.tA)*12});if(p.some(q=>q.y<cv.height))fr=requestAnimationFrame(draw);else ctx.clearRect(0,0,cv.width,cv.height)})();
+  setTimeout(()=>{ctx.clearRect(0,0,cv.width,cv.height);cancelAnimationFrame(fr)},4000);
+}
+function toast(msg){const el=document.getElementById('rtoast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200)}
+function sparkle(x,y){const el=document.createElement('div');el.className='sparkle';el.style.cssText=`left:${x-18}px;top:${y-18}px`;el.innerHTML=`<svg viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="7" fill="#57ffc8" opacity=".85"/>${[0,45,90,135,180,225,270,315].map(a=>`<line x1="18" y1="18" x2="${18+13*Math.cos(a*Math.PI/180)}" y2="${18+13*Math.sin(a*Math.PI/180)}" stroke="#57ffc8" stroke-width="1.8" stroke-linecap="round"/>`).join('')}</svg>`;document.body.appendChild(el);setTimeout(()=>el.remove(),550)}
+
+/* ── 8-BIT SOUND ── */
+function playPixelSound(type){
+  try{
+    const ac=new(window.AudioContext||window.webkitAudioContext)();
+    const notes=type==='focus'
+      ?[[523,.0,.12],[659,.14,.12],[784,.28,.12],[1047,.42,.22]]
+      :[[784,.0,.1],[659,.12,.1],[523,.24,.18]];
+    notes.forEach(([freq,start,dur])=>{
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.type='square';o.frequency.value=freq;
+      g.gain.setValueAtTime(0,ac.currentTime+start);
+      g.gain.linearRampToValueAtTime(.15,ac.currentTime+start+.01);
+      g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+start+dur);
+      o.connect(g);g.connect(ac.destination);
+      o.start(ac.currentTime+start);o.stop(ac.currentTime+start+dur+.05);
+    });
+    setTimeout(()=>ac.close(),1500);
+  }catch(e){}
+}
+
+/* ── NOTIFICATIONS ── */
+const FOCUS_MSGS=['잘 했어요! 5분 눈 감고 쉬세요 👀','짧게 스트레칭 한 번 🙆','물 한 잔 마시고 와요 💧','잠깐 창밖 좀 보세요 🌿','훌륭해요, 딱 5분만 쉬어요 ✨'];
+const BREAK_MSGS=['다시 해낼 수 있어요, 파이팅! 💪','한 번 더, 할 수 있어요 🔥','지금이 가장 좋은 타이밍 ⚡','집중 ON! 이번에도 잘 할 거예요 🎯','작은 집중이 큰 결과를 만들어요 🌱'];
+const rand=arr=>arr[Math.floor(Math.random()*arr.length)];
+function sendNotif(title,body){if(typeof Notification!=='undefined'&&Notification.permission==='granted'){try{new Notification(title,{body})}catch(e){}}}
+
+/* ── MINI POPUP WINDOW ── */
+let miniWin=null;
+function openMiniPopup(rem,mode){
+  const w=220,h=130;
+  const left=window.screen.width-w-20,top=20;
+  if(miniWin&&!miniWin.closed){miniWin.focus();updateMiniPopup(rem,mode);return}
+  miniWin=window.open('','PMTimerMini',`width=${w},height=${h},left=${left},top=${top},resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,status=no`);
+  if(!miniWin)return;
+  const rc=mode==='focus'?'#c8ff57':'#57ffc8';
+  miniWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>PM Timer</title>
+  <style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0f0f13;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:'DM Mono',monospace;cursor:default;user-select:none}
+  #timer{font-size:42px;font-weight:500;letter-spacing:3px;color:${rc};line-height:1;transition:color .5s}
+  #mode{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#6b6876;margin-top:6px}
+  #label{font-size:10px;color:#9997a0;margin-top:10px;letter-spacing:1px}
+  </style></head><body>
+  <div id="timer">${fmt(rem)}</div>
+  <div id="mode">${mode==='focus'?'FOCUS':'BREAK'}</div>
+  <div id="label">${mode==='focus'?'집중 중...':'휴식 중...'}</div>
+  </body></html>`);
+  miniWin.document.close();
+}
+function updateMiniPopup(rem,mode){
+  if(!miniWin||miniWin.closed)return;
+  try{
+    const tc=miniWin.document.getElementById('timer');
+    const mc=miniWin.document.getElementById('mode');
+    const lb=miniWin.document.getElementById('label');
+    if(tc){tc.textContent=fmt(rem);tc.style.color=mode==='focus'?'#c8ff57':'#57ffc8'}
+    if(mc)mc.textContent=mode==='focus'?'FOCUS':'BREAK';
+    if(lb)lb.textContent=mode==='focus'?'집중 중...':'휴식 중...';
+  }catch(e){}
+}
+
+/* ── FOCUS PRESETS ── */
+const PRESETS=[
+  {label:'25분',min:25},
+  {label:'50분',min:50},
+  {label:'1시간',min:60},
+  {label:'2시간',min:120},
+];
+
+/* ── DEFAULT CATS ── */
+const DEFAULT_CATS=[
+  {id:'idea',    label:'아이디어', cls:'idea'},
+  {id:'todo',    label:'개인 할일',cls:'todo'},
+  {id:'random',  label:'잡념',    cls:'random'},
+  {id:'insight', label:'인사이트',cls:'insight'},
+  {id:'research',label:'리서치',  cls:'research'},
+  {id:'meeting', label:'회의',    cls:'meeting'},
+];
+
+/* ════ HISTORY MODAL ════ */
+function HistModal({history,onClose}){
+  const [open,setOpen]=useState(null);
+  const sorted=[...history].sort((a,b)=>b.date.localeCompare(a.date));
+  return(
+    <div className="mbk" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal">
+        <div className="mhd">
+          <span className="mtitle">📅 일별 기록 ({history.length}일)</span>
+          <button className="ibt" onClick={onClose}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+        </div>
+        <div className="mbody">
+          {sorted.length===0&&<div className="empty-h">📭 아직 기록이 없어요<br/><span style={{fontSize:10}}>하루를 마감하면 여기 쌓여요</span></div>}
+          {sorted.map(day=>(
+            <div className="hday" key={day.date}>
+              <div className="hdhd" onClick={()=>setOpen(open===day.date?null:day.date)}>
+                <span className="hddate">{fmtKo(day.date)}</span>
+                <div className="hdstats">
+                  <span className="hchip f">🎯 {day.sessions}회</span>
+                  <span className="hchip b">☕ {day.breaks}회</span>
+                  <span className="hchip i">📝 {day.items.length}건</span>
+                </div>
+              </div>
+              {open===day.date&&(
+                <div className="hitems">
+                  {day.items.length===0&&<div style={{fontSize:10,color:'var(--t3)'}}>항목 없음</div>}
+                  {day.items.map((it,i)=>(
+                    <div className="hirow" key={i}>
+                      <span>{it.done?'✅':'⬜'}</span>
+                      {it.tag&&<span className={`tag ${it.tag}`}>{it.tag}</span>}
+                      <span className={it.done?'hidone':''}>{it.text}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ════ ONBOARDING ════ */
+function Onboarding({onDone}){
+  return(
+    <div className="onboard-bk">
+      <div className="onboard">
+        <div className="ob-logo">🍅</div>
+        <div className="ob-title">PM Focus Dashboard</div>
+        <div className="ob-sub">집중력 관리 도구 — 빠른 사용법</div>
+        <div className="ob-steps">
+          <div className="ob-step">
+            <div className="ob-icon">⏱️</div>
+            <div className="ob-text"><b>집중 시간 선택</b> 후 ▶️ 버튼을 누르세요.<br/>25분 / 50분 / 1시간 / 2시간, 또는 직접 입력도 가능해요.</div>
+          </div>
+          <div className="ob-step">
+            <div className="ob-icon">🔒</div>
+            <div className="ob-text"><b>집중 시간 중엔 인박스가 잠겨요.</b><br/>잡념이 생기면 <b>맨 위 입력창</b>에 바로 입력하고 Enter! 집중이 끊기지 않아요.</div>
+          </div>
+          <div className="ob-step">
+            <div className="ob-icon">☕</div>
+            <div className="ob-text"><b>휴식 시간엔 인박스가 열려요.</b><br/>적어둔 잡념들을 카테고리로 정리하고 체크해보세요.</div>
+          </div>
+          <div className="ob-step">
+            <div className="ob-icon">🌅</div>
+            <div className="ob-text"><b>자정이 되면 자동으로 하루가 마감</b>되고<br/>기록이 이력에 저장돼요. 수동 마감도 가능해요.</div>
+          </div>
+        </div>
+        <button className="ob-start" onClick={onDone}>시작하기 🚀</button>
+      </div>
+    </div>
+  );
+}
+
+/* ════ CONFIRM ════ */
+function Confirm({title,sub,icon,onOk,onNo}){
+  return(
+    <div className="cfbk">
+      <div className="cfov" onClick={onNo}/>
+      <div className="cfcard">
+        <div className="cfico">{icon||'⚠️'}</div>
+        <div className="cftit">{title}</div>
+        <div className="cfsub">{sub}</div>
+        <div className="cfbtns">
+          <button className="cfb cancel" onClick={onNo}>취소</button>
+          <button className="cfb danger" onClick={onOk}>초기화</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ════ CAT MGR ════ */
+function CatMgr({cats,onAdd,onDel}){
+  const [show,setShow]=useState(false);
+  const [val,setVal]=useState('');
+  const add=()=>{const v=val.trim();if(!v)return;onAdd(v);setVal('')};
+  return(
+    <div className="cat-mgr">
+      <div className="cat-hd">
+        <span className="cat-lbl">카테고리</span>
+        <button className="ibt" onClick={()=>setShow(s=>!s)} title="카테고리 관리">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+      </div>
+      {show&&(
+        <>
+          <div className="cat-chips" style={{marginBottom:5}}>
+            {cats.map(c=>(
+              <div key={c.id} className={`cat-chip tag ${c.cls||'unset'}`}>
+                <span>{c.label}</span>
+                {!DEFAULT_CATS.find(d=>d.id===c.id)&&(
+                  <button className="cat-del" onClick={()=>onDel(c.id)}>×</button>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="cat-add-row">
+            <input className="cat-inp" value={val} onChange={e=>setVal(e.target.value)} onKeyDown={e=>e.key==='Enter'&&add()} placeholder="새 카테고리 이름..."/>
+            <button className="cat-add-btn" onClick={add}>추가</button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ════ INBOX ITEM ════ */
+function IItem({item,cats,onToggle,onTag,onDel,onEdit,disabled}){
+  const [pop,setPop]=useState(false);
+  const [editing,setEditing]=useState(false);
+  const [ev,setEv]=useState(item.text);
+  const eref=useRef(null);
+  useEffect(()=>{if(editing&&eref.current)eref.current.focus()},[editing]);
+  const del=()=>{setPop(true);setTimeout(()=>onDel(item.id),300)};
+  const commit=()=>{const v=ev.trim();if(v)onEdit(item.id,v);setEditing(false)};
+  const tagCat=cats.find(c=>c.id===item.tag);
+  const tagCls=tagCat?.cls||item.tag||'unset';
+  const tagLabel=tagCat?.label||(item.tag?item.tag:'태그');
+  return(
+    <div className={`ii${item.done?' done':''}${pop?' pout':''}`} style={{opacity:disabled?.42:1}}>
+      <button className={`icheck${item.done?' ck':''}`} onClick={e=>!disabled&&onToggle(item.id,e)} disabled={disabled}>
+        {item.done&&<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5"/></svg>}
+      </button>
+      <div className="i-body">
+        {editing
+          ?<input ref={eref} className="iedit" value={ev} onChange={e=>setEv(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')commit();if(e.key==='Escape')setEditing(false)}} onBlur={commit}/>
+          :<span className="it" onDoubleClick={()=>!disabled&&!item.done&&(setEv(item.text),setEditing(true))} title="더블클릭으로 수정">{item.text}</span>
+        }
+        <div className="itags">
+          <span className={`tag ${tagCls}`} onClick={()=>!disabled&&onTag(item.id)}>{tagLabel}</span>
+          {!editing&&!item.done&&!disabled&&(
+            <button className="ibt" style={{padding:'0 2px'}} onClick={()=>{setEv(item.text);setEditing(true)}}>
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+          )}
+        </div>
+      </div>
+      <button className="idel" onClick={del} disabled={disabled}>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+  );
+}
+
+/* ════════════ APP ════════════ */
+function App(){
+  const [theme,setTheme]       =useState(()=>LS.get('pmd-theme','dark'));
+  const [compact,setCompact]   =useState(false);
+  const [showHist,setShowHist] =useState(false);
+  const [confirm,setConfirm]   =useState(false);
+  const [flash,setFlash]       =useState(false);
+  const [showOnboard,setShowOnboard]=useState(()=>!LS.get('pmd-onboard-done',false));
+  const [notifPerm,setNotifPerm]=useState(()=>typeof Notification!=='undefined'?Notification.permission:'denied');
+  const [miniOpen,setMiniOpen] =useState(false);
+
+  /* focus preset */
+  const [focusMin,setFocusMin]   =useState(()=>LS.get('pmd-focus-min',25));
+  const [customMin,setCustomMin] =useState('');
+  const FS=focusMin*60;
+  const BS=Math.max(1,Math.round(focusMin/5))*60;
+
+  /* timer */
+  const [mode,setMode]         =useState(()=>LS.get('pmd-mode','focus'));
+  const [rem,setRem]           =useState(()=>LS.get('pmd-rem',FS));
+  const [running,setRunning]   =useState(false);
+  const [sessions,setSessions] =useState(()=>LS.get('pmd-sessions',0));
+  const [breaks,setBreaks]     =useState(()=>LS.get('pmd-breaks',0));
+
+  /* inbox */
+  const [items,setItems]       =useState(()=>LS.get('pmd-items',[]));
+  const [draft,setDraft]       =useState('');
+  const [cdraft,setCdraft]     =useState('');
+  const [filter,setFilter]     =useState('all');
+
+  /* history */
+  const [history,setHistory]   =useState(()=>LS.get('pmd-history',[]));
+  const [lastDate,setLastDate] =useState(()=>LS.get('pmd-lastdate',todayStr()));
+
+  /* cats */
+  const [cats,setCats]=useState(()=>{
+    const stored=LS.get('pmd-cats',null);
+    if(!stored)return DEFAULT_CATS;
+    const ids=new Set(stored.map(c=>c.id));
+    return[...stored,...DEFAULT_CATS.filter(d=>!ids.has(d.id))];
+  });
+
+  const timerRef=useRef(null);
+  const remRef=useRef(rem);remRef.current=rem;
+  const modeRef=useRef(mode);modeRef.current=mode;
+  const sessRef=useRef(sessions),brkRef=useRef(breaks),itemsRef=useRef(items),lastRef=useRef(lastDate);
+  sessRef.current=sessions;brkRef.current=breaks;itemsRef.current=items;lastRef.current=lastDate;
+
+  /* persist */
+  useEffect(()=>LS.set('pmd-theme',theme),[theme]);
+  useEffect(()=>LS.set('pmd-mode',mode),[mode]);
+  useEffect(()=>LS.set('pmd-rem',rem),[rem]);
+  useEffect(()=>LS.set('pmd-sessions',sessions),[sessions]);
+  useEffect(()=>LS.set('pmd-breaks',breaks),[breaks]);
+  useEffect(()=>LS.set('pmd-items',items),[items]);
+  useEffect(()=>LS.set('pmd-history',history),[history]);
+  useEffect(()=>LS.set('pmd-lastdate',lastDate),[lastDate]);
+  useEffect(()=>LS.set('pmd-cats',cats),[cats]);
+  useEffect(()=>LS.set('pmd-focus-min',focusMin),[focusMin]);
+
+  /* notif permission */
+  const requestNotif=()=>{
+    if(typeof Notification==='undefined')return;
+    Notification.requestPermission().then(p=>setNotifPerm(p));
+  };
+
+  /* ── SAVE SNAPSHOT (STABLE — does not close over state) ── */
+  const saveSnapshot=useCallback((fromDate,s,b,its)=>{
+    // Deep clone items to avoid reference issues
+    const rec={date:fromDate,sessions:s,breaks:b,items:its.map(it=>({...it}))};
+    setHistory(h=>{
+      const idx=h.findIndex(x=>x.date===fromDate);
+      if(idx>=0){const n=[...h];n[idx]=rec;return n;}
+      return[rec,...h];
+    });
+  },[]);
+
+  /* ── FULL RESET ── */
+  const doReset=useCallback((fromDate,s,b,its)=>{
+    saveSnapshot(fromDate,s,b,its);
+    setSessions(0);setBreaks(0);setItems([]);
+    setMode('focus');setRem(FS);setRunning(false);
+    const today=todayStr();
+    setLastDate(today);
+    setFlash(true);setTimeout(()=>setFlash(false),700);
+  },[saveSnapshot,FS]);
+
+  /* ── AUTO DATE CHECK ── */
+  useEffect(()=>{
+    const check=()=>{
+      const today=todayStr();
+      const last=lastRef.current;
+      if(last&&last!==today){
+        // save yesterday's data then reset
+        doReset(last,sessRef.current,brkRef.current,itemsRef.current);
+        toast('🌅 새 날! 어제 기록을 저장했어요');
+      }
+    };
+    // Slight delay on mount to let state hydrate from LS
+    const t=setTimeout(check,500);
+    const iv=setInterval(check,60000);
+    return()=>{clearTimeout(t);clearInterval(iv)};
+  },[]);
+
+  /* ── TAB TITLE ── */
+  useEffect(()=>{
+    if(running)document.title=`[${fmt(rem)}] ${mode==='focus'?'집중 중...':'휴식 중...'}`;
+    else document.title='PM Focus Dashboard';
+  },[rem,running,mode]);
+
+  /* ── MINI POPUP SYNC ── */
+  useEffect(()=>{
+    if(miniOpen&&running)updateMiniPopup(rem,mode);
+  },[rem,mode,miniOpen,running]);
+
+  /* ── TICK ── */
+  useEffect(()=>{
+    if(running){
+      timerRef.current=setInterval(()=>{
+        setRem(p=>{
+          if(p<=1){clearInterval(timerRef.current);handleEnd();return 0;}
+          return p-1;
+        });
+      },1000);
+    }else clearInterval(timerRef.current);
+    return()=>clearInterval(timerRef.current);
+  },[running,mode]);
+
+  const handleEnd=useCallback(()=>{
+    setRunning(false);
+    const curMode=modeRef.current;
+    if(curMode==='focus'){
+      setSessions(s=>s+1);
+      launchConfetti();
+      playPixelSound('focus');
+      const msg=rand(FOCUS_MSGS);
+      sendNotif('🍅 집중 완료! 5분 휴식 시작',msg);
+      setTimeout(()=>toast(`🎉 집중 완료! ${msg}`),300);
+      setMode('break');
+      setRem(BS);
+      setTimeout(()=>setRunning(true),500);
+    }else{
+      setBreaks(b=>b+1);
+      playPixelSound('break');
+      const msg=rand(BREAK_MSGS);
+      sendNotif('⚡ 휴식 완료! 다시 집중할 시간',msg);
+      setTimeout(()=>toast(`💪 휴식 완료! ${msg}`),300);
+      setMode('focus');
+      setRem(FS);
+      setTimeout(()=>setRunning(true),500);
+    }
+  },[FS,BS]);
+
+  /* ── FOCUS PRESET CHANGE ── */
+  const changePreset=min=>{
+    setFocusMin(min);setRunning(false);
+    setMode('focus');setRem(min*60);setCustomMin('');
+  };
+  const applyCustom=()=>{
+    const n=parseInt(customMin);
+    if(!n||n<1||n>480)return;
+    setFocusMin(n);setRunning(false);setMode('focus');setRem(n*60);
+  };
+
+  /* ── MANUAL RESET ── */
+  const doManual=()=>{
+    const today=todayStr();
+    doReset(today,sessions,breaks,items);
+    setConfirm(false);
+    toast('✨ 오늘 기록 저장 후 초기화!');
+  };
+
+  /* ── MINI POPUP ── */
+  const handleMiniPopup=()=>{
+    openMiniPopup(rem,mode);
+    setMiniOpen(true);
+  };
+
+  /* ── INBOX ── */
+  const addItem=t=>{const x=t.trim();if(!x)return false;setItems(p=>[{id:Date.now(),text:x,tag:null,done:false},...p]);return true};
+  const toggleDone=(id,e)=>{sparkle(e.clientX,e.clientY);setItems(p=>p.map(it=>it.id===id?{...it,done:!it.done}:it))};
+  const cycleTag=id=>{
+    setItems(p=>p.map(it=>{
+      if(it.id!==id)return it;
+      const ids=[null,...cats.map(c=>c.id)];
+      const cur=ids.indexOf(it.tag);
+      return{...it,tag:ids[(cur+1)%ids.length]};
+    }));
+  };
+  const delItem=id=>setItems(p=>p.filter(it=>it.id!==id));
+  const editItem=(id,text)=>setItems(p=>p.map(it=>it.id===id?{...it,text}:it));
+
+  /* ── CATS ── */
+  const CLS_POOL=['idea','todo','random','meeting','insight','research'];
+  const addCat=label=>{const id='c'+Date.now();const cls=CLS_POOL[cats.length%CLS_POOL.length];setCats(c=>[...c,{id,label,cls}])};
+  const delCat=id=>{setCats(c=>c.filter(x=>x.id!==id));setItems(p=>p.map(it=>it.tag===id?{...it,tag:null}:it))};
+
+  /* ── FILTER ── */
+  const filtered=useMemo(()=>{
+    if(filter==='all')return items;
+    if(filter==='none')return items.filter(it=>!it.tag);
+    return items.filter(it=>it.tag===filter);
+  },[items,filter]);
+
+  /* ── RING ── */
+  const total=mode==='focus'?FS:BS;
+  const RR=65,CIRC=2*Math.PI*RR;
+  const dashOff=CIRC*(1-rem/total);
+  const rc=mode==='focus'?'#c8ff57':'#57ffc8';
+  const locked=mode==='focus'&&running;
+  const doneN=items.filter(i=>i.done).length;
+  const today=todayStr();
+
+  /* mobile textarea submit */
+  const handleMobileKey=e=>{
+    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(addItem(cdraft))setCdraft('')}
+  };
+
+  return(
+    <div className={`shell ${theme==='light'?'light':''} ${compact?'compact':''} ${running&&mode==='focus'?'is-focus':''} ${running&&mode==='break'?'is-break':''}`}>
+
+      {/* ONBOARDING */}
+      {showOnboard&&<Onboarding onDone={()=>{LS.set('pmd-onboard-done',true);setShowOnboard(false)}}/>}
+
+      {/* TOP BAR */}
+      <div className="topbar">
+        <span className="tb-logo">PM</span>
+        <span className={`tb-timer${mode==='break'?' brk':''}`} onClick={handleMiniPopup} title="클릭하면 미니 팝업 창 열림">{fmt(rem)}</span>
+        <span className="tb-mode">{mode==='focus'?'집중':'휴식'}</span>
+        <button className="tb-play" onClick={()=>setRunning(r=>!r)}>
+          {running
+            ?<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
+            :<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>}
+        </button>
+        <div className="tb-sep"/>
+        {/* desktop input */}
+        <div className="tb-input-wrap">
+          <div className="tb-input">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--t2)" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
+            <input value={cdraft} onChange={e=>setCdraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){if(addItem(cdraft))setCdraft('')}}} placeholder="잡념 입력 후 Enter…"/>
+          </div>
+          {/* mobile textarea */}
+          <div className="tb-mobile-input">
+            <textarea value={cdraft} onChange={e=>setCdraft(e.target.value)} onKeyDown={handleMobileKey} placeholder="잡념 입력… (Enter=저장, Shift+Enter=줄바꿈)" rows={1}
+              onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px'}}/>
+            <div className="tb-mobile-hint">Enter 저장 · Shift+Enter 줄바꿈</div>
+          </div>
+        </div>
+        <span style={{fontSize:10,color:'var(--t3)',minWidth:14,textAlign:'center',flexShrink:0}}>{items.length}</span>
+        <div className="tb-sep"/>
+        {notifPerm!=='granted'
+          ?<button className="notif-btn" onClick={requestNotif}>🔔 알림허용</button>
+          :<span className="notif-btn ok" title="알림 ON">🔔</span>
+        }
+        <button className="ibt gold" onClick={()=>setShowHist(true)} title="기록">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+        </button>
+        <button className="ibt red" onClick={()=>setConfirm(true)} title="하루 마감">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+        <button className="ibt" onClick={()=>setTheme(t=>t==='dark'?'light':'dark')} style={{fontSize:12}}>{theme==='dark'?'☀️':'🌙'}</button>
+        <button className="ibt" onClick={()=>setCompact(c=>!c)} title="컴팩트">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            {compact?<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                    :<path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M21 16v3a2 2 0 0 0-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"/>}
+          </svg>
+        </button>
+      </div>
+
+      {/* SCROLL */}
+      <div className="scroll-area">
+        <div className="grid">
+
+          {/* TIMER CARD */}
+          <div className={`card card-timer${flash?' flash':''}`}>
+            {/* focus mode selector */}
+            <div className="focus-modes">
+              {PRESETS.map(p=>(
+                <button key={p.min} className={`fm-btn${focusMin===p.min&&mode==='focus'?' active':focusMin===p.min&&mode==='break'?' brk-active':''}`} onClick={()=>changePreset(p.min)}>{p.label}</button>
+              ))}
+              <input className="custom-min" value={customMin} onChange={e=>setCustomMin(e.target.value)} onKeyDown={e=>e.key==='Enter'&&applyCustom()} placeholder="직접입력" title="분 단위 입력 후 Enter"/>
+            </div>
+
+            <div className="ring-wrap">
+              <svg className="ring-svg" width="160" height="160" viewBox="0 0 160 160">
+                <circle className="ring-bg" cx="80" cy="80" r={RR}/>
+                <circle className="ring-fg" cx="80" cy="80" r={RR} stroke={rc} strokeDasharray={CIRC} strokeDashoffset={dashOff}/>
+              </svg>
+              <div className="ring-time" style={{color:rc}}>{fmt(rem)}</div>
+              <div className="ring-sub">{mode==='focus'?`FOCUS · ${focusMin}분`:'BREAK'}</div>
+            </div>
+
+            <div className="tctrl">
+              <button className="tcb" onClick={()=>{setRunning(false);setRem(mode==='focus'?FS:BS)}} title="초기화">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              </button>
+              <button className={`tcb primary${mode==='break'?' brk':''}`} onClick={()=>setRunning(r=>!r)}>
+                {running
+                  ?<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
+                  :<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>}
+              </button>
+              <button className="tcb" onClick={()=>{setRunning(false);if(mode==='focus'){setMode('break');setRem(BS)}else{setMode('focus');setRem(FS)}}} title="건너뛰기">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 4l10 8-10 8V4zm10 0h4v16h-4V4z"/></svg>
+              </button>
+            </div>
+
+            <button className="popup-btn" onClick={handleMiniPopup} title="미니 팝업 창 열기">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              미니 팝업 창 열기
+            </button>
+
+            <div className="stats">
+              <div className="stat"><div className="sv">{sessions}</div><div className="sl">집중</div></div>
+              <div className="stat"><div className="sv b">{breaks}</div><div className="sl">휴식</div></div>
+              <div className="stat"><div className="sv r">{items.length}</div><div className="sl">잡념</div></div>
+              <div className="stat"><div className="sv o">{doneN}</div><div className="sl">처리됨</div></div>
+            </div>
+
+            <div className="daily-row">
+              <div>
+                <div className="daily-date"><b>{fmtKo(today)}</b></div>
+                <div style={{fontSize:8,color:'var(--t3)',marginTop:2}}>{history.length>0?`총 ${history.length}일 기록`:' 첫 날이에요!'}</div>
+              </div>
+              <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
+                <span className="auto-badge">자동초기화</span>
+                <button className="reset-btn" onClick={()=>setConfirm(true)}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                  하루 마감
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* INBOX CARD */}
+          <div className="card card-inbox" style={{position:'relative',minHeight:320}}>
+            {locked&&(
+              <div className="inbox-locked">
+                <div style={{fontSize:24}}>🔒</div>
+                <div style={{fontSize:12,color:'var(--t2)',fontWeight:600}}>집중 시간엔 잠겨요</div>
+                <div style={{fontSize:10,color:'var(--t3)'}}>상단 입력창에서 잡념 입력 가능</div>
+              </div>
+            )}
+            <div className="inbox-hd">
+              <span className="inbox-title">🧠 인박스</span>
+              <div style={{display:'flex',alignItems:'center',gap:7}}>
+                {doneN>0&&(
+                  <button className="ibt red" onClick={()=>setItems(p=>p.filter(i=>!i.done))} style={{fontSize:10,gap:3,padding:'2px 7px',border:'1px solid var(--b1)',borderRadius:6}}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+                    완료 삭제
+                  </button>
+                )}
+                <span className="inbox-cnt">{items.length-doneN}/{items.length}</span>
+              </div>
+            </div>
+
+            <CatMgr cats={cats} onAdd={addCat} onDel={delCat}/>
+
+            <div className="inbox-iw">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--t2)" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
+              <input className="inbox-inp" value={draft} onChange={e=>setDraft(e.target.value)}
+                onKeyDown={e=>{if(e.key==='Enter'){if(addItem(draft))setDraft('')}}}
+                placeholder={locked?'집중 중 — 상단 입력창을 이용하세요':'잡념을 입력하고 Enter…'}/>
+            </div>
+
+            {/* FILTER TABS */}
+            <div className="filter-tabs">
+              <button className={`ftab${filter==='all'?' active':''}`} onClick={()=>setFilter('all')}>전체 {items.length}</button>
+              {cats.map(c=>{
+                const cnt=items.filter(it=>it.tag===c.id).length;
+                if(cnt===0)return null;
+                return<button key={c.id} className={`ftab${filter===c.id?` active ${c.cls}`:''}`} onClick={()=>setFilter(filter===c.id?'all':c.id)}>{c.label} {cnt}</button>
+              })}
+              {items.some(it=>!it.tag)&&(
+                <button className={`ftab${filter==='none'?' active none':''}`} onClick={()=>setFilter(filter==='none'?'all':'none')}>미분류 {items.filter(it=>!it.tag).length}</button>
+              )}
+            </div>
+
+            <div className="ilist">
+              {filtered.length===0&&(
+                <div className="empty-inbox">
+                  {filter==='all'?<><div style={{fontSize:24,marginBottom:6}}>🌿</div><div>아직 잡념이 없어요</div><div style={{fontSize:10,marginTop:3}}>집중하세요!</div></>
+                  :<><div style={{fontSize:20,marginBottom:5}}>🔍</div><div>해당 카테고리 항목이 없어요</div></>}
+                </div>
+              )}
+              {filtered.map(it=>(
+                <IItem key={it.id} item={it} cats={cats} onToggle={toggleDone} onTag={cycleTag} onDel={delItem} onEdit={editItem} disabled={locked}/>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {showHist&&<HistModal history={history} onClose={()=>setShowHist(false)}/>}
+      {confirm&&(
+        <Confirm icon="📦" title="오늘 하루를 마감할까요?"
+          sub={`${fmtKo(today)}의 기록을 저장하고\n집중·휴식 횟수와 인박스를 초기화해요.\n(기록은 이력에 보관됩니다)`}
+          onOk={doManual} onNo={()=>setConfirm(false)}/>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
