@@ -59,17 +59,19 @@ html,body,#root{width:100%;height:100%;font-family:var(--fb);background:var(--bg
 /* Mobile topbar input — hidden on desktop */
 .tb-mobile-input{display:none}
 @media(max-width:680px){
+  .topbar{height:auto;min-height:auto;padding:8px 10px;flex-wrap:wrap;gap:6px}
   .tb-input{display:none}
+  .tb-input-wrap{order:10;width:100%;flex:0 0 100%;margin-top:2px}
   .tb-mobile-input{
     display:flex;flex-direction:column;gap:0;
     background:var(--s2);border:1px solid var(--b1);border-radius:7px;
-    padding:4px 9px;transition:border-color .2s;
+    padding:4px 9px;transition:border-color .2s;width:100%;
   }
   .tb-mobile-input:focus-within{border-color:var(--ac)}
   .tb-mobile-input textarea{
     width:100%;background:transparent;border:none;outline:none;
-    font-size:13px;color:var(--t1);font-family:var(--fb);
-    resize:none;min-height:32px;max-height:80px;line-height:1.4;
+    font-size:12px;color:var(--t1);font-family:var(--fb);
+    resize:none;min-height:28px;max-height:80px;line-height:1.4;
   }
   .tb-mobile-input textarea::placeholder{color:var(--t2);opacity:1}
   .tb-mobile-hint{font-size:9px;color:var(--t3);text-align:right;padding-top:1px}
@@ -90,10 +92,11 @@ html,body,#root{width:100%;height:100%;font-family:var(--fb);background:var(--bg
 
 /* ── GRID ── */
 .grid{display:grid;grid-template-columns:300px 1fr;gap:12px;padding:12px;min-height:100%}
-@media(max-width:680px){.grid{grid-template-columns:1fr;min-height:auto}}
+@media(max-width:680px){.grid{grid-template-columns:1fr;min-height:auto;padding:10px;gap:10px}}
 
 /* ── CARD ── */
 .card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);backdrop-filter:var(--blur);padding:16px;position:relative;overflow:hidden;transition:background .3s,border .3s}
+@media(max-width:680px){.card{padding:14px}}
 .card-timer{display:flex;flex-direction:column}
 .card-inbox{display:flex;flex-direction:column}
 
@@ -129,7 +132,7 @@ html,body,#root{width:100%;height:100%;font-family:var(--fb);background:var(--bg
 /* ── STATS ── */
 .stats{display:flex;justify-content:space-between;padding:10px 0 0;border-top:1px solid var(--b1);margin-top:auto}
 .stat{text-align:center}
-.sv{font-family:var(--fm);font-size:15px;font-weight:500;color:var(--ac)}
+.sv{font-family:var(--fm);font-size:13px;font-weight:500;color:var(--ac)}
 .sv.b{color:var(--ac2)}.sv.r{color:var(--ac3)}.sv.o{color:var(--ac4)}
 .sl{font-size:8px;color:var(--t3);letter-spacing:.7px;text-transform:uppercase;margin-top:1px}
 
@@ -273,14 +276,6 @@ html,body,#root{width:100%;height:100%;font-family:var(--fb);background:var(--bg
 .compact .grid{display:none!important}
 .compact .topbar{border-bottom:none}
 .empty-inbox{text-align:center;padding:20px 0;color:var(--t3);font-size:12px;line-height:1.8}
-
-/* mobile tweaks */
-@media(max-width:680px){
-  .topbar{height:auto;min-height:46px;padding:6px 10px;flex-wrap:wrap;gap:6px}
-  .tb-input-wrap{order:10;width:100%}
-  .grid{padding:10px;gap:10px}
-  .card{padding:14px}
-}
 </style>
 </head>
 <body>
@@ -296,10 +291,20 @@ const LS={
   set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
 };
 
-/* ── DATE ── */
+/* ── DATE & TIME FORMAT ── */
 function todayStr(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function fmtKo(s){if(!s)return'';const[y,m,d]=s.split('-');const day=new Date(+y,+m-1,+d).getDay();return`${y}.${m}.${d} (${'일월화수목금토'[day]})`}
 function fmt(sec){return`${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`}
+
+/* 초 단위 시간을 보기 좋은 텍스트(예: 1시간 30분, 45분)로 변환 */
+function fmtDuration(totalSec){
+  const sec = typeof totalSec === 'number' ? totalSec : 0;
+  const m = Math.floor(sec / 60);
+  if(m < 60) return `${m}분`;
+  const h = Math.floor(m / 60);
+  const rm = m % 60;
+  return rm > 0 ? `${h}시간 ${rm}분` : `${h}시간`;
+}
 
 /* ── CONFETTI ── */
 function launchConfetti(){
@@ -383,7 +388,7 @@ const PRESETS=[
 const DEFAULT_CATS=[
   {id:'idea',    label:'아이디어', cls:'idea'},
   {id:'todo',    label:'개인 할일',cls:'todo'},
-  {id:'random',  label:'잡념',    cls:'random'},
+  {id:'random',  label:'메모 or 잡념', cls:'random'},
   {id:'insight', label:'인사이트',cls:'insight'},
   {id:'research',label:'리서치',  cls:'research'},
   {id:'meeting', label:'회의',    cls:'meeting'},
@@ -407,8 +412,8 @@ function HistModal({history,onClose}){
               <div className="hdhd" onClick={()=>setOpen(open===day.date?null:day.date)}>
                 <span className="hddate">{fmtKo(day.date)}</span>
                 <div className="hdstats">
-                  <span className="hchip f">🎯 {day.sessions}회</span>
-                  <span className="hchip b">☕ {day.breaks}회</span>
+                  <span className="hchip f">🎯 {fmtDuration(day.focusSec || day.sessions*1500)}</span>
+                  <span className="hchip b">☕ {fmtDuration(day.breakSec || day.breaks*300)}</span>
                   <span className="hchip i">📝 {day.items.length}건</span>
                 </div>
               </div>
@@ -447,11 +452,11 @@ function Onboarding({onDone}){
           </div>
           <div className="ob-step">
             <div className="ob-icon">🔒</div>
-            <div className="ob-text"><b>집중 시간 중엔 인박스가 잠겨요.</b><br/>잡념이 생기면 <b>맨 위 입력창</b>에 바로 입력하고 Enter! 집중이 끊기지 않아요.</div>
+            <div className="ob-text"><b>집중 시간 중엔 인박스가 잠겨요.</b><br/>메모 or 잡념이 생기면 <b>맨 위 입력창</b>에 바로 입력하고 Enter! 집중이 끊기지 않아요.</div>
           </div>
           <div className="ob-step">
             <div className="ob-icon">☕</div>
-            <div className="ob-text"><b>휴식 시간엔 인박스가 열려요.</b><br/>적어둔 잡념들을 카테고리로 정리하고 체크해보세요.</div>
+            <div className="ob-text"><b>휴식 시간엔 인박스가 열려요.</b><br/>적어둔 메모나 잡념들을 카테고리로 정리하고 체크해보세요.</div>
           </div>
           <div className="ob-step">
             <div className="ob-icon">🌅</div>
@@ -572,12 +577,12 @@ function App(){
   const FS=focusMin*60;
   const BS=Math.max(1,Math.round(focusMin/5))*60;
 
-  /* timer */
+  /* timer & accumulated seconds */
   const [mode,setMode]         =useState(()=>LS.get('pmd-mode','focus'));
   const [rem,setRem]           =useState(()=>LS.get('pmd-rem',FS));
   const [running,setRunning]   =useState(false);
-  const [sessions,setSessions] =useState(()=>LS.get('pmd-sessions',0));
-  const [breaks,setBreaks]     =useState(()=>LS.get('pmd-breaks',0));
+  const [focusSec,setFocusSec] =useState(()=>LS.get('pmd-focus-sec',0));
+  const [breakSec,setBreakSec] =useState(()=>LS.get('pmd-break-sec',0));
 
   /* inbox */
   const [items,setItems]       =useState(()=>LS.get('pmd-items',[]));
@@ -600,15 +605,15 @@ function App(){
   const timerRef=useRef(null);
   const remRef=useRef(rem);remRef.current=rem;
   const modeRef=useRef(mode);modeRef.current=mode;
-  const sessRef=useRef(sessions),brkRef=useRef(breaks),itemsRef=useRef(items),lastRef=useRef(lastDate);
-  sessRef.current=sessions;brkRef.current=breaks;itemsRef.current=items;lastRef.current=lastDate;
+  const fSecRef=useRef(focusSec),bSecRef=useRef(breakSec),itemsRef=useRef(items),lastRef=useRef(lastDate);
+  fSecRef.current=focusSec;bSecRef.current=breakSec;itemsRef.current=items;lastRef.current=lastDate;
 
   /* persist */
   useEffect(()=>LS.set('pmd-theme',theme),[theme]);
   useEffect(()=>LS.set('pmd-mode',mode),[mode]);
   useEffect(()=>LS.set('pmd-rem',rem),[rem]);
-  useEffect(()=>LS.set('pmd-sessions',sessions),[sessions]);
-  useEffect(()=>LS.set('pmd-breaks',breaks),[breaks]);
+  useEffect(()=>LS.set('pmd-focus-sec',focusSec),[focusSec]);
+  useEffect(()=>LS.set('pmd-break-sec',breakSec),[breakSec]);
   useEffect(()=>LS.set('pmd-items',items),[items]);
   useEffect(()=>LS.set('pmd-history',history),[history]);
   useEffect(()=>LS.set('pmd-lastdate',lastDate),[lastDate]);
@@ -621,10 +626,9 @@ function App(){
     Notification.requestPermission().then(p=>setNotifPerm(p));
   };
 
-  /* ── SAVE SNAPSHOT (STABLE — does not close over state) ── */
-  const saveSnapshot=useCallback((fromDate,s,b,its)=>{
-    // Deep clone items to avoid reference issues
-    const rec={date:fromDate,sessions:s,breaks:b,items:its.map(it=>({...it}))};
+  /* ── SAVE SNAPSHOT ── */
+  const saveSnapshot=useCallback((fromDate,fSec,bSec,its)=>{
+    const rec={date:fromDate,focusSec:fSec,breakSec:bSec,items:its.map(it=>({...it}))};
     setHistory(h=>{
       const idx=h.findIndex(x=>x.date===fromDate);
       if(idx>=0){const n=[...h];n[idx]=rec;return n;}
@@ -633,9 +637,9 @@ function App(){
   },[]);
 
   /* ── FULL RESET ── */
-  const doReset=useCallback((fromDate,s,b,its)=>{
-    saveSnapshot(fromDate,s,b,its);
-    setSessions(0);setBreaks(0);setItems([]);
+  const doReset=useCallback((fromDate,fSec,bSec,its)=>{
+    saveSnapshot(fromDate,fSec,bSec,its);
+    setFocusSec(0);setBreakSec(0);setItems([]);
     setMode('focus');setRem(FS);setRunning(false);
     const today=todayStr();
     setLastDate(today);
@@ -648,12 +652,10 @@ function App(){
       const today=todayStr();
       const last=lastRef.current;
       if(last&&last!==today){
-        // save yesterday's data then reset
-        doReset(last,sessRef.current,brkRef.current,itemsRef.current);
+        doReset(last,fSecRef.current,bSecRef.current,itemsRef.current);
         toast('🌅 새 날! 어제 기록을 저장했어요');
       }
     };
-    // Slight delay on mount to let state hydrate from LS
     const t=setTimeout(check,500);
     const iv=setInterval(check,60000);
     return()=>{clearTimeout(t);clearInterval(iv)};
@@ -687,7 +689,7 @@ function App(){
     setRunning(false);
     const curMode=modeRef.current;
     if(curMode==='focus'){
-      setSessions(s=>s+1);
+      setFocusSec(s=>s+FS);
       launchConfetti();
       playPixelSound('focus');
       const msg=rand(FOCUS_MSGS);
@@ -697,7 +699,7 @@ function App(){
       setRem(BS);
       setTimeout(()=>setRunning(true),500);
     }else{
-      setBreaks(b=>b+1);
+      setBreakSec(b=>b+BS);
       playPixelSound('break');
       const msg=rand(BREAK_MSGS);
       sendNotif('⚡ 휴식 완료! 다시 집중할 시간',msg);
@@ -722,7 +724,7 @@ function App(){
   /* ── MANUAL RESET ── */
   const doManual=()=>{
     const today=todayStr();
-    doReset(today,sessions,breaks,items);
+    doReset(today,focusSec,breakSec,items);
     setConfirm(false);
     toast('✨ 오늘 기록 저장 후 초기화!');
   };
@@ -794,11 +796,11 @@ function App(){
         <div className="tb-input-wrap">
           <div className="tb-input">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--t2)" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
-            <input value={cdraft} onChange={e=>setCdraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){if(addItem(cdraft))setCdraft('')}}} placeholder="잡념 입력 후 Enter…"/>
+            <input value={cdraft} onChange={e=>setCdraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){if(addItem(cdraft))setCdraft('')}}} placeholder="메모 or 잡념 입력 후 Enter…"/>
           </div>
           {/* mobile textarea */}
           <div className="tb-mobile-input">
-            <textarea value={cdraft} onChange={e=>setCdraft(e.target.value)} onKeyDown={handleMobileKey} placeholder="잡념 입력… (Enter=저장, Shift+Enter=줄바꿈)" rows={1}
+            <textarea value={cdraft} onChange={e=>setCdraft(e.target.value)} onKeyDown={handleMobileKey} placeholder="메모 or 잡념 입력…" rows={1}
               onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px'}}/>
             <div className="tb-mobile-hint">Enter 저장 · Shift+Enter 줄바꿈</div>
           </div>
@@ -867,9 +869,9 @@ function App(){
             </button>
 
             <div className="stats">
-              <div className="stat"><div className="sv">{sessions}</div><div className="sl">집중</div></div>
-              <div className="stat"><div className="sv b">{breaks}</div><div className="sl">휴식</div></div>
-              <div className="stat"><div className="sv r">{items.length}</div><div className="sl">잡념</div></div>
+              <div className="stat"><div className="sv">{fmtDuration(focusSec)}</div><div className="sl">집중시간</div></div>
+              <div className="stat"><div className="sv b">{fmtDuration(breakSec)}</div><div className="sl">휴식시간</div></div>
+              <div className="stat"><div className="sv r">{items.length}</div><div className="sl">메모/잡념</div></div>
               <div className="stat"><div className="sv o">{doneN}</div><div className="sl">처리됨</div></div>
             </div>
 
@@ -894,7 +896,7 @@ function App(){
               <div className="inbox-locked">
                 <div style={{fontSize:24}}>🔒</div>
                 <div style={{fontSize:12,color:'var(--t2)',fontWeight:600}}>집중 시간엔 잠겨요</div>
-                <div style={{fontSize:10,color:'var(--t3)'}}>상단 입력창에서 잡념 입력 가능</div>
+                <div style={{fontSize:10,color:'var(--t3)'}}>상단 입력창에서 메모 or 잡념 입력 가능</div>
               </div>
             )}
             <div className="inbox-hd">
@@ -916,7 +918,7 @@ function App(){
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--t2)" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
               <input className="inbox-inp" value={draft} onChange={e=>setDraft(e.target.value)}
                 onKeyDown={e=>{if(e.key==='Enter'){if(addItem(draft))setDraft('')}}}
-                placeholder={locked?'집중 중 — 상단 입력창을 이용하세요':'잡념을 입력하고 Enter…'}/>
+                placeholder={locked?'집중 중 — 상단 입력창을 이용하세요':'메모 or 잡념을 입력하고 Enter…'}/>
             </div>
 
             {/* FILTER TABS */}
@@ -935,7 +937,7 @@ function App(){
             <div className="ilist">
               {filtered.length===0&&(
                 <div className="empty-inbox">
-                  {filter==='all'?<><div style={{fontSize:24,marginBottom:6}}>🌿</div><div>아직 잡념이 없어요</div><div style={{fontSize:10,marginTop:3}}>집중하세요!</div></>
+                  {filter==='all'?<><div style={{fontSize:24,marginBottom:6}}>🌿</div><div>아직 작성된 메모나 잡념이 없어요</div><div style={{fontSize:10,marginTop:3}}>집중하세요!</div></>
                   :<><div style={{fontSize:20,marginBottom:5}}>🔍</div><div>해당 카테고리 항목이 없어요</div></>}
                 </div>
               )}
@@ -950,7 +952,7 @@ function App(){
       {showHist&&<HistModal history={history} onClose={()=>setShowHist(false)}/>}
       {confirm&&(
         <Confirm icon="📦" title="오늘 하루를 마감할까요?"
-          sub={`${fmtKo(today)}의 기록을 저장하고\n집중·휴식 횟수와 인박스를 초기화해요.\n(기록은 이력에 보관됩니다)`}
+          sub={`${fmtKo(today)}의 기록을 저장하고\n집중·휴식 시간과 인박스를 초기화해요.\n(기록은 이력에 보관됩니다)`}
           onOk={doManual} onNo={()=>setConfirm(false)}/>
       )}
     </div>
