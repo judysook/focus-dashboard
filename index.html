@@ -56,7 +56,7 @@ html,body,#root{width:100%;height:100%;font-family:var(--fb);background:var(--bg
 .tb-input input{flex:1;min-width:0;background:transparent;border:none;outline:none;font-size:12px;color:var(--t1);font-family:var(--fb)}
 .tb-input input::placeholder{color:var(--t2);opacity:1}
 
-/* Mobile topbar input — hidden on desktop */
+/* Mobile topbar input */
 .tb-mobile-input{display:none}
 @media(max-width:680px){
   .topbar{height:auto;min-height:auto;padding:8px 10px;flex-wrap:wrap;gap:6px}
@@ -81,16 +81,16 @@ html,body,#root{width:100%;height:100%;font-family:var(--fb);background:var(--bg
 .ibt:hover{color:var(--t1);background:var(--s3)}
 .ibt.red:hover{color:var(--ac3)}
 .ibt.gold:hover{color:var(--ac4)}
+
 .notif-btn{font-size:10px;padding:3px 7px;border-radius:6px;border:1px solid var(--b2);background:var(--s2);color:var(--t2);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s}
 .notif-btn:hover{background:var(--s3)}
 .notif-btn.ok{border-color:rgba(200,255,87,.3);color:var(--ac);background:rgba(200,255,87,.06)}
+.notif-btn.off{border-color:rgba(255,107,107,.3);color:var(--ac3);background:rgba(255,107,107,.06)}
 
-/* ── SCROLL ── */
+/* ── SCROLL & GRID ── */
 .scroll-area{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
 .scroll-area::-webkit-scrollbar{width:3px}
 .scroll-area::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
-
-/* ── GRID ── */
 .grid{display:grid;grid-template-columns:300px 1fr;gap:12px;padding:12px;min-height:100%}
 @media(max-width:680px){.grid{grid-template-columns:1fr;min-height:auto;padding:10px;gap:10px}}
 
@@ -100,12 +100,23 @@ html,body,#root{width:100%;height:100%;font-family:var(--fb);background:var(--bg
 .card-timer{display:flex;flex-direction:column}
 .card-inbox{display:flex;flex-direction:column}
 
+/* ── MODE SWITCH TOGGLE ── */
+.mode-toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:4px 6px;background:var(--s2);border-radius:8px;border:1px solid var(--b1)}
+.mode-toggle-label{font-size:10px;font-weight:700;color:var(--t2);display:flex;align-items:center;gap:4px}
+.toggle-switch{position:relative;display:inline-block;width:32px;height:18px}
+.toggle-switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;inset:0;background-color:var(--b2);transition:.2s;border-radius:18px}
+.slider:before{position:absolute;content:"";height:12px;width:12px;left:3px;bottom:3px;background-color:#fff;transition:.2s;border-radius:50%}
+input:checked + .slider{background-color:var(--ac4)}
+input:checked + .slider:before{transform:translateX(14px)}
+
 /* ── FOCUS MODE SELECTOR ── */
-.focus-modes{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;align-items:center}
-.fm-btn{font-size:10px;font-weight:600;letter-spacing:.5px;padding:4px 10px;border-radius:20px;border:1px solid var(--b2);cursor:pointer;transition:all .2s;color:var(--t2);background:transparent;white-space:nowrap}
+.setting-section-title{font-size:9px;color:var(--t3);letter-spacing:.5px;margin-bottom:4px;text-transform:uppercase;font-weight:600}
+.focus-modes{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;align-items:center}
+.fm-btn{font-size:9px;font-weight:600;letter-spacing:.3px;padding:3px 8px;border-radius:20px;border:1px solid var(--b2);cursor:pointer;transition:all .2s;color:var(--t2);background:transparent;white-space:nowrap}
 .fm-btn.active{background:var(--ac);color:#0f0f13;border-color:var(--ac)}
 .fm-btn.brk-active{background:var(--ac2);color:#0f0f13;border-color:var(--ac2)}
-.custom-min{width:52px;background:var(--s2);border:1px solid var(--b1);border-radius:7px;padding:3px 7px;font-size:11px;color:var(--t1);font-family:var(--fm);outline:none;text-align:center}
+.custom-min{width:58px;background:var(--s2);border:1px solid var(--b1);border-radius:7px;padding:2px 4px;font-size:10px;color:var(--t1);font-family:var(--fm);outline:none;text-align:center}
 .custom-min:focus{border-color:var(--ac)}
 .custom-min::placeholder{color:var(--t3)}
 
@@ -125,7 +136,6 @@ html,body,#root{width:100%;height:100%;font-family:var(--fb);background:var(--bg
 .tcb:hover:not(.primary){background:var(--s3)}
 .tcb.primary:hover{opacity:.87}
 
-/* mini popup btn */
 .popup-btn{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t3);background:none;border:none;cursor:pointer;padding:3px 6px;border-radius:6px;transition:all .2s;margin:0 auto 8px}
 .popup-btn:hover{color:var(--t1);background:var(--s2)}
 
@@ -140,7 +150,6 @@ html,body,#root{width:100%;height:100%;font-family:var(--fb);background:var(--bg
 .daily-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:8px 10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);flex-wrap:wrap;gap:6px}
 .daily-date{font-family:var(--fm);font-size:9px;color:var(--t3)}
 .daily-date b{color:var(--t2);font-weight:500}
-.auto-badge{font-size:8px;padding:2px 5px;border-radius:5px;background:rgba(255,179,71,.1);color:var(--ac4);border:1px solid rgba(255,179,71,.2)}
 .reset-btn{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:4px 9px;border-radius:7px;border:1px solid rgba(255,107,107,.3);background:rgba(255,107,107,.07);color:var(--ac3);cursor:pointer;transition:all .2s}
 .reset-btn:hover{background:rgba(255,107,107,.18);border-color:var(--ac3)}
 
@@ -166,7 +175,6 @@ html,body,#root{width:100%;height:100%;font-family:var(--fb);background:var(--bg
 .ftab.active.research{background:rgba(87,200,255,.12);color:#57c8ff; border-color:rgba(87,200,255,.3)}
 .ftab.active.none   {background:rgba(160,157,176,.12);color:var(--t2);border-color:rgba(160,157,176,.3)}
 
-/* ── LOCKED ── */
 .inbox-locked{position:absolute;inset:0;background:rgba(15,15,19,.72);backdrop-filter:blur(5px);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;z-index:10}
 .light .inbox-locked{background:rgba(240,238,232,.78)}
 
@@ -228,7 +236,8 @@ html,body,#root{width:100%;height:100%;font-family:var(--fb);background:var(--bg
 .hchip{font-size:9px;padding:2px 6px;border-radius:5px;font-weight:600}
 .hchip.f{background:rgba(200,255,87,.1);color:var(--ac)}
 .hchip.b{background:rgba(87,255,200,.1);color:var(--ac2)}
-.hchip.i{background:rgba(255,179,71,.1);color:var(--ac4)}
+.hchip.done{background:rgba(255,179,71,.1);color:var(--ac4)}
+.hchip.undone{background:rgba(255,107,107,.1);color:var(--ac3)}
 .hitems{padding:8px 12px;display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--b1)}
 .hirow{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)}
 .hidone{color:var(--t3);text-decoration:line-through}
@@ -236,16 +245,20 @@ html,body,#root{width:100%;height:100%;font-family:var(--fb);background:var(--bg
 
 /* ── ONBOARDING MODAL ── */
 .onboard-bk{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;animation:fIn .3s ease}
-.onboard{background:var(--bg);border:1px solid var(--b2);border-radius:20px;width:100%;max-width:460px;padding:28px 26px 22px;animation:sUp .3s ease}
-.ob-logo{font-size:32px;margin-bottom:10px;text-align:center}
+.onboard{background:var(--bg);border:1px solid var(--b2);border-radius:20px;width:100%;max-width:480px;max-height:88vh;padding:24px 22px 20px;display:flex;flex-direction:column;animation:sUp .3s ease;overflow:hidden}
+.ob-logo{font-size:30px;margin-bottom:6px;text-align:center}
 .ob-title{font-size:16px;font-weight:700;text-align:center;margin-bottom:4px}
-.ob-sub{font-size:11px;color:var(--t3);text-align:center;margin-bottom:20px}
-.ob-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:22px}
+.ob-sub{font-size:11px;color:var(--t3);text-align:center;margin-bottom:16px}
+.ob-scroll-area{overflow-y:auto;flex:1;padding-right:4px;margin-bottom:16px}
+.ob-scroll-area::-webkit-scrollbar{width:3px}
+.ob-scroll-area::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+.ob-steps{display:flex;flex-direction:column;gap:10px}
 .ob-step{display:flex;align-items:flex-start;gap:10px;background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:11px 13px}
 .ob-icon{font-size:18px;flex-shrink:0;margin-top:1px}
-.ob-text{font-size:12px;line-height:1.6;color:var(--t2)}
+.ob-text{font-size:12px;line-height:1.6;color:var(--t2);word-break:break-word}
 .ob-text b{color:var(--t1)}
-.ob-start{width:100%;padding:11px;border-radius:11px;background:var(--ac);color:#0f0f13;border:none;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:opacity .2s}
+.ob-text a{color:var(--ac);text-decoration:underline}
+.ob-start{width:100%;padding:11px;border-radius:11px;background:var(--ac);color:#0f0f13;border:none;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:opacity .2s;flex-shrink:0}
 .ob-start:hover{opacity:.88}
 
 /* ── CONFIRM ── */
@@ -294,13 +307,17 @@ const LS={
 /* ── DATE & TIME FORMAT ── */
 function todayStr(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function fmtKo(s){if(!s)return'';const[y,m,d]=s.split('-');const day=new Date(+y,+m-1,+d).getDay();return`${y}.${m}.${d} (${'일월화수목금토'[day]})`}
-function fmt(sec){return`${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`}
+function fmt(sec){
+  const m = Math.floor(sec/60).toString().padStart(2,'0');
+  const s = (sec%60).toString().padStart(2,'0');
+  return `${m}:${s}`;
+}
 
-/* 초 단위 시간을 보기 좋은 텍스트(예: 1시간 30분, 45분)로 변환 */
 function fmtDuration(totalSec){
   const sec = typeof totalSec === 'number' ? totalSec : 0;
   const m = Math.floor(sec / 60);
-  if(m < 60) return `${m}분`;
+  const s = sec % 60;
+  if(m < 60) return s > 0 ? `${m}분 ${s}초` : `${m}분`;
   const h = Math.floor(m / 60);
   const rm = m % 60;
   return rm > 0 ? `${h}시간 ${rm}분` : `${h}시간`;
@@ -338,15 +355,19 @@ function playPixelSound(type){
 }
 
 /* ── NOTIFICATIONS ── */
-const FOCUS_MSGS=['잘 했어요! 5분 눈 감고 쉬세요 👀','짧게 스트레칭 한 번 🙆','물 한 잔 마시고 와요 💧','잠깐 창밖 좀 보세요 🌿','훌륭해요, 딱 5분만 쉬어요 ✨'];
+const FOCUS_MSGS=['잘 했어요! 휴식 시간입니다 👀','짧게 스트레칭 한 번 🙆','물 한 잔 마시고 와요 💧','잠깐 창밖 좀 보세요 🌿','훌륭해요, 잠시 쉬어갑시다 ✨'];
 const BREAK_MSGS=['다시 해낼 수 있어요, 파이팅! 💪','한 번 더, 할 수 있어요 🔥','지금이 가장 좋은 타이밍 ⚡','집중 ON! 이번에도 잘 할 거예요 🎯','작은 집중이 큰 결과를 만들어요 🌱'];
 const rand=arr=>arr[Math.floor(Math.random()*arr.length)];
-function sendNotif(title,body){if(typeof Notification!=='undefined'&&Notification.permission==='granted'){try{new Notification(title,{body})}catch(e){}}}
+function sendNotif(title,body,enabled){
+  if(enabled && typeof Notification!=='undefined' && Notification.permission==='granted'){
+    try{new Notification(title,{body})}catch(e){}
+  }
+}
 
 /* ── MINI POPUP WINDOW ── */
 let miniWin=null;
 function openMiniPopup(rem,mode){
-  const w=220,h=130;
+  const w=320,h=190;
   const left=window.screen.width-w-20,top=20;
   if(miniWin&&!miniWin.closed){miniWin.focus();updateMiniPopup(rem,mode);return}
   miniWin=window.open('','PMTimerMini',`width=${w},height=${h},left=${left},top=${top},resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,status=no`);
@@ -354,9 +375,9 @@ function openMiniPopup(rem,mode){
   const rc=mode==='focus'?'#c8ff57':'#57ffc8';
   miniWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>PM Timer</title>
   <style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0f0f13;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:'DM Mono',monospace;cursor:default;user-select:none}
-  #timer{font-size:42px;font-weight:500;letter-spacing:3px;color:${rc};line-height:1;transition:color .5s}
-  #mode{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#6b6876;margin-top:6px}
-  #label{font-size:10px;color:#9997a0;margin-top:10px;letter-spacing:1px}
+  #timer{font-size:64px;font-weight:700;letter-spacing:3px;color:${rc};line-height:1;transition:color .5s}
+  #mode{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#6b6876;margin-top:10px;font-weight:600}
+  #label{font-size:12px;color:#9997a0;margin-top:6px;letter-spacing:1px}
   </style></head><body>
   <div id="timer">${fmt(rem)}</div>
   <div id="mode">${mode==='focus'?'FOCUS':'BREAK'}</div>
@@ -376,12 +397,19 @@ function updateMiniPopup(rem,mode){
   }catch(e){}
 }
 
-/* ── FOCUS PRESETS ── */
-const PRESETS=[
-  {label:'25분',min:25},
-  {label:'50분',min:50},
-  {label:'1시간',min:60},
-  {label:'2시간',min:120},
+/* ── PRESETS ── */
+const FOCUS_PRESETS=[
+  {label:'25분',sec:1500},
+  {label:'50분',sec:3000},
+  {label:'1시간',sec:3600},
+  {label:'2시간',sec:7200},
+];
+
+const BREAK_PRESETS=[
+  {label:'5분',sec:300},
+  {label:'10분',sec:600},
+  {label:'15분',sec:900},
+  {label:'20분',sec:1200},
 ];
 
 /* ── DEFAULT CATS ── */
@@ -407,63 +435,86 @@ function HistModal({history,onClose}){
         </div>
         <div className="mbody">
           {sorted.length===0&&<div className="empty-h">📭 아직 기록이 없어요<br/><span style={{fontSize:10}}>하루를 마감하면 여기 쌓여요</span></div>}
-          {sorted.map(day=>(
-            <div className="hday" key={day.date}>
-              <div className="hdhd" onClick={()=>setOpen(open===day.date?null:day.date)}>
-                <span className="hddate">{fmtKo(day.date)}</span>
-                <div className="hdstats">
-                  <span className="hchip f">🎯 {fmtDuration(day.focusSec || day.sessions*1500)}</span>
-                  <span className="hchip b">☕ {fmtDuration(day.breakSec || day.breaks*300)}</span>
-                  <span className="hchip i">📝 {day.items.length}건</span>
+          {sorted.map(day=>{
+            const doneCount = day.items ? day.items.filter(i=>i.done).length : 0;
+            const undoneCount = day.items ? day.items.filter(i=>!i.done).length : 0;
+            return (
+              <div className="hday" key={day.date}>
+                <div className="hdhd" onClick={()=>setOpen(open===day.date?null:day.date)}>
+                  <span className="hddate">{fmtKo(day.date)}</span>
+                  <div className="hdstats">
+                    <span className="hchip f">🎯 {fmtDuration(day.focusSec || 0)}</span>
+                    <span className="hchip b">☕ {fmtDuration(day.breakSec || 0)}</span>
+                    <span className="hchip done">✅ 완료 {doneCount}건</span>
+                    <span className="hchip undone">⬜ 미완료 {undoneCount}건</span>
+                  </div>
                 </div>
+                {open===day.date&&(
+                  <div className="hitems">
+                    {day.items.length===0&&<div style={{fontSize:10,color:'var(--t3)'}}>항목 없음</div>}
+                    {day.items.map((it,i)=>(
+                      <div className="hirow" key={i}>
+                        <span>{it.done?'✅':'⬜'}</span>
+                        {it.tag&&<span className={`tag ${it.tag}`}>{it.tag}</span>}
+                        <span className={it.done?'hidone':''}>{it.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              {open===day.date&&(
-                <div className="hitems">
-                  {day.items.length===0&&<div style={{fontSize:10,color:'var(--t3)'}}>항목 없음</div>}
-                  {day.items.map((it,i)=>(
-                    <div className="hirow" key={i}>
-                      <span>{it.done?'✅':'⬜'}</span>
-                      {it.tag&&<span className={`tag ${it.tag}`}>{it.tag}</span>}
-                      <span className={it.done?'hidone':''}>{it.text}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
   );
 }
 
-/* ════ ONBOARDING ════ */
+/* ════ ONBOARDING & USER GUIDE MODAL ════ */
 function Onboarding({onDone}){
   return(
     <div className="onboard-bk">
       <div className="onboard">
         <div className="ob-logo">🍅</div>
         <div className="ob-title">PM Focus Dashboard</div>
-        <div className="ob-sub">집중력 관리 도구 — 빠른 사용법</div>
-        <div className="ob-steps">
-          <div className="ob-step">
-            <div className="ob-icon">⏱️</div>
-            <div className="ob-text"><b>집중 시간 선택</b> 후 ▶️ 버튼을 누르세요.<br/>25분 / 50분 / 1시간 / 2시간, 또는 직접 입력도 가능해요.</div>
-          </div>
-          <div className="ob-step">
-            <div className="ob-icon">🔒</div>
-            <div className="ob-text"><b>집중 시간 중엔 인박스가 잠겨요.</b><br/>메모 or 잡념이 생기면 <b>맨 위 입력창</b>에 바로 입력하고 Enter! 집중이 끊기지 않아요.</div>
-          </div>
-          <div className="ob-step">
-            <div className="ob-icon">☕</div>
-            <div className="ob-text"><b>휴식 시간엔 인박스가 열려요.</b><br/>적어둔 메모나 잡념들을 카테고리로 정리하고 체크해보세요.</div>
-          </div>
-          <div className="ob-step">
-            <div className="ob-icon">🌅</div>
-            <div className="ob-text"><b>자정이 되면 자동으로 하루가 마감</b>되고<br/>기록이 이력에 저장돼요. 수동 마감도 가능해요.</div>
+        <div className="ob-sub">사용자 가이드 & 사용법</div>
+        
+        <div className="ob-scroll-area">
+          <div className="ob-steps">
+            <div className="ob-step">
+              <div className="ob-icon">📲</div>
+              <div className="ob-text">
+                <b>홈 화면 앱 설치 안내 (추천)</b><br/>
+                <a href="https://focustimer-dashboard.vercel.app/" target="_blank">https://focustimer-dashboard.vercel.app/</a><br/>
+                사이트를 핸드폰 홈화면에 설치해주세요! (이용 편의를 위한 설치입니다.)<br/><br/>
+                <b>• 안드로이드 설치방법:</b> 크롬 앱에서 링크 복붙 후 페이지 열고, 오른쪽 상단 점 세 개 버튼 누른 뒤 "설치 및 바로가기 만들기" 눌러서 설치해주세요.<br/><br/>
+                <b>• 아이폰 설치방법:</b> 사파리 앱에서 링크 복붙 후 페이지 열고, 하단 점 세 개(공유 버튼) 누른 뒤 "공유" ➔ "더보기" ➔ "홈화면에 추가" 진행
+              </div>
+            </div>
+            <div className="ob-step">
+              <div className="ob-icon">🎓</div>
+              <div className="ob-text"><b>수험생 모드 지원</b><br/>수험생 모드 토글을 켜면 집중 시간과 별개로 <b>휴식 시간을 자유롭게 개별 설정</b>할 수 있습니다.</div>
+            </div>
+            <div className="ob-step">
+              <div className="ob-icon">⏱️</div>
+              <div className="ob-text"><b>집중 시간 선택</b> 후 ▶️ 버튼을 누르세요.<br/>직접 입력으로 분, 초 단위(예: 10:30, 90) 설정이 가능해요.</div>
+            </div>
+            <div className="ob-step">
+              <div className="ob-icon">🔒</div>
+              <div className="ob-text"><b>집중 시간 중엔 인박스가 잠겨요.</b><br/>메모 or 잡념이 생기면 <b>맨 위 입력창</b>에 바로 입력하고 Enter!</div>
+            </div>
+            <div className="ob-step">
+              <div className="ob-icon">☕</div>
+              <div className="ob-text"><b>휴식 시간엔 인박스가 열려요.</b><br/>적어둔 메모나 잡념들을 카테고리로 정리하고 체크해보세요.</div>
+            </div>
+            <div className="ob-step">
+              <div className="ob-icon">📌</div>
+              <div className="ob-text"><b>작성한 메모는 날짜가 지나도 유지됩니다.</b><br/>언제든 '하루 마감' 버튼을 눌러 원하는 시점에 기록 보관 가능해요.</div>
+            </div>
           </div>
         </div>
-        <button className="ob-start" onClick={onDone}>시작하기 🚀</button>
+
+        <button className="ob-start" onClick={onDone}>확인 및 시작하기 🚀</button>
       </div>
     </div>
   );
@@ -568,14 +619,20 @@ function App(){
   const [confirm,setConfirm]   =useState(false);
   const [flash,setFlash]       =useState(false);
   const [showOnboard,setShowOnboard]=useState(()=>!LS.get('pmd-onboard-done',false));
-  const [notifPerm,setNotifPerm]=useState(()=>typeof Notification!=='undefined'?Notification.permission:'denied');
+  const [notifEnabled,setNotifEnabled]=useState(()=>LS.get('pmd-notif-enabled',true));
   const [miniOpen,setMiniOpen] =useState(false);
 
-  /* focus preset */
-  const [focusMin,setFocusMin]   =useState(()=>LS.get('pmd-focus-min',25));
-  const [customMin,setCustomMin] =useState('');
-  const FS=focusMin*60;
-  const BS=Math.max(1,Math.round(focusMin/5))*60;
+  /* 수험생 모드 토글 */
+  const [examMode,setExamMode] =useState(()=>LS.get('pmd-exam-mode',false));
+
+  /* focus & break setting (seconds) */
+  const [focusSecSetting,setFocusSecSetting] =useState(()=>LS.get('pmd-focus-sec-setting',1500));
+  const [breakSecSetting,setBreakSecSetting] =useState(()=>LS.get('pmd-break-sec-setting',300));
+  const [customFocusInput,setCustomFocusInput] =useState('');
+  const [customBreakInput,setCustomBreakInput] =useState('');
+
+  const FS = focusSecSetting;
+  const BS = examMode ? breakSecSetting : Math.max(5, Math.round(focusSecSetting / 5));
 
   /* timer & accumulated seconds */
   const [mode,setMode]         =useState(()=>LS.get('pmd-mode','focus'));
@@ -592,7 +649,6 @@ function App(){
 
   /* history */
   const [history,setHistory]   =useState(()=>LS.get('pmd-history',[]));
-  const [lastDate,setLastDate] =useState(()=>LS.get('pmd-lastdate',todayStr()));
 
   /* cats */
   const [cats,setCats]=useState(()=>{
@@ -603,10 +659,9 @@ function App(){
   });
 
   const timerRef=useRef(null);
+  const wakeLockRef=useRef(null);
   const remRef=useRef(rem);remRef.current=rem;
   const modeRef=useRef(mode);modeRef.current=mode;
-  const fSecRef=useRef(focusSec),bSecRef=useRef(breakSec),itemsRef=useRef(items),lastRef=useRef(lastDate);
-  fSecRef.current=focusSec;bSecRef.current=breakSec;itemsRef.current=items;lastRef.current=lastDate;
 
   /* persist */
   useEffect(()=>LS.set('pmd-theme',theme),[theme]);
@@ -616,14 +671,58 @@ function App(){
   useEffect(()=>LS.set('pmd-break-sec',breakSec),[breakSec]);
   useEffect(()=>LS.set('pmd-items',items),[items]);
   useEffect(()=>LS.set('pmd-history',history),[history]);
-  useEffect(()=>LS.set('pmd-lastdate',lastDate),[lastDate]);
   useEffect(()=>LS.set('pmd-cats',cats),[cats]);
-  useEffect(()=>LS.set('pmd-focus-min',focusMin),[focusMin]);
+  useEffect(()=>LS.set('pmd-focus-sec-setting',focusSecSetting),[focusSecSetting]);
+  useEffect(()=>LS.set('pmd-break-sec-setting',breakSecSetting),[breakSecSetting]);
+  useEffect(()=>LS.set('pmd-notif-enabled',notifEnabled),[notifEnabled]);
+  useEffect(()=>LS.set('pmd-exam-mode',examMode),[examMode]);
 
-  /* notif permission */
-  const requestNotif=()=>{
-    if(typeof Notification==='undefined')return;
-    Notification.requestPermission().then(p=>setNotifPerm(p));
+  /* Screen Wake Lock */
+  useEffect(() => {
+    const requestWakeLock = async () => {
+      try {
+        if ('wakeLock' in navigator && running) {
+          wakeLockRef.current = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {}
+    };
+
+    if (running) {
+      requestWakeLock();
+    } else {
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release().catch(() => {});
+        wakeLockRef.current = null;
+      }
+    }
+
+    return () => {
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release().catch(() => {});
+        wakeLockRef.current = null;
+      }
+    };
+  }, [running]);
+
+  /* 알림 토글 */
+  const toggleNotif=()=>{
+    if(typeof Notification==='undefined'){
+      toast('⚠️ 이 브라우저는 알림을 지원하지 않습니다.');
+      return;
+    }
+    if(!notifEnabled){
+      Notification.requestPermission().then(p=>{
+        if(p==='granted'){
+          setNotifEnabled(true);
+          toast('🔔 알림이 켜졌습니다.');
+        }else{
+          toast('⚠️ 브라우저 알림 권한이 거부되었습니다.');
+        }
+      });
+    }else{
+      setNotifEnabled(false);
+      toast('🔕 알림이 꺼졌습니다.');
+    }
   };
 
   /* ── SAVE SNAPSHOT ── */
@@ -641,25 +740,8 @@ function App(){
     saveSnapshot(fromDate,fSec,bSec,its);
     setFocusSec(0);setBreakSec(0);setItems([]);
     setMode('focus');setRem(FS);setRunning(false);
-    const today=todayStr();
-    setLastDate(today);
     setFlash(true);setTimeout(()=>setFlash(false),700);
   },[saveSnapshot,FS]);
-
-  /* ── AUTO DATE CHECK ── */
-  useEffect(()=>{
-    const check=()=>{
-      const today=todayStr();
-      const last=lastRef.current;
-      if(last&&last!==today){
-        doReset(last,fSecRef.current,bSecRef.current,itemsRef.current);
-        toast('🌅 새 날! 어제 기록을 저장했어요');
-      }
-    };
-    const t=setTimeout(check,500);
-    const iv=setInterval(check,60000);
-    return()=>{clearTimeout(t);clearInterval(iv)};
-  },[]);
 
   /* ── TAB TITLE ── */
   useEffect(()=>{
@@ -672,7 +754,7 @@ function App(){
     if(miniOpen&&running)updateMiniPopup(rem,mode);
   },[rem,mode,miniOpen,running]);
 
-  /* ── TICK ── */
+  /* ── TIMER TICK ── */
   useEffect(()=>{
     if(running){
       timerRef.current=setInterval(()=>{
@@ -693,7 +775,7 @@ function App(){
       launchConfetti();
       playPixelSound('focus');
       const msg=rand(FOCUS_MSGS);
-      sendNotif('🍅 집중 완료! 5분 휴식 시작',msg);
+      sendNotif('🍅 집중 완료! 휴식 시작',msg, notifEnabled);
       setTimeout(()=>toast(`🎉 집중 완료! ${msg}`),300);
       setMode('break');
       setRem(BS);
@@ -702,23 +784,54 @@ function App(){
       setBreakSec(b=>b+BS);
       playPixelSound('break');
       const msg=rand(BREAK_MSGS);
-      sendNotif('⚡ 휴식 완료! 다시 집중할 시간',msg);
+      sendNotif('⚡ 휴식 완료! 다시 집중할 시간',msg, notifEnabled);
       setTimeout(()=>toast(`💪 휴식 완료! ${msg}`),300);
       setMode('focus');
       setRem(FS);
       setTimeout(()=>setRunning(true),500);
     }
-  },[FS,BS]);
+  },[FS,BS,notifEnabled]);
 
-  /* ── FOCUS PRESET CHANGE ── */
-  const changePreset=min=>{
-    setFocusMin(min);setRunning(false);
-    setMode('focus');setRem(min*60);setCustomMin('');
+  /* ── PRESET & CUSTOM PARSING ── */
+  const parseInputToSec = (val) => {
+    const trimmed = val.trim();
+    if(!trimmed) return 0;
+    if(trimmed.includes(':')){
+      const parts = trimmed.split(':');
+      const m = parseInt(parts[0]) || 0;
+      const s = parseInt(parts[1]) || 0;
+      return m * 60 + s;
+    } else {
+      const n = parseInt(trimmed);
+      if(n > 0) return n > 300 ? n : n * 60;
+    }
+    return 0;
   };
-  const applyCustom=()=>{
-    const n=parseInt(customMin);
-    if(!n||n<1||n>480)return;
-    setFocusMin(n);setRunning(false);setMode('focus');setRem(n*60);
+
+  const changeFocusPreset = sec => {
+    setFocusSecSetting(sec); setRunning(false);
+    if(mode==='focus') setRem(sec);
+    setCustomFocusInput('');
+  };
+
+  const changeBreakPreset = sec => {
+    setBreakSecSetting(sec); setRunning(false);
+    if(mode==='break') setRem(sec);
+    setCustomBreakInput('');
+  };
+
+  const applyCustomFocus = () => {
+    const targetSec = parseInputToSec(customFocusInput);
+    if(targetSec <= 0) return;
+    setFocusSecSetting(targetSec); setRunning(false);
+    if(mode==='focus') setRem(targetSec);
+  };
+
+  const applyCustomBreak = () => {
+    const targetSec = parseInputToSec(customBreakInput);
+    if(targetSec <= 0) return;
+    setBreakSecSetting(targetSec); setRunning(false);
+    if(mode==='break') setRem(targetSec);
   };
 
   /* ── MANUAL RESET ── */
@@ -770,7 +883,6 @@ function App(){
   const doneN=items.filter(i=>i.done).length;
   const today=todayStr();
 
-  /* mobile textarea submit */
   const handleMobileKey=e=>{
     if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(addItem(cdraft))setCdraft('')}
   };
@@ -778,7 +890,6 @@ function App(){
   return(
     <div className={`shell ${theme==='light'?'light':''} ${compact?'compact':''} ${running&&mode==='focus'?'is-focus':''} ${running&&mode==='break'?'is-break':''}`}>
 
-      {/* ONBOARDING */}
       {showOnboard&&<Onboarding onDone={()=>{LS.set('pmd-onboard-done',true);setShowOnboard(false)}}/>}
 
       {/* TOP BAR */}
@@ -792,13 +903,11 @@ function App(){
             :<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>}
         </button>
         <div className="tb-sep"/>
-        {/* desktop input */}
         <div className="tb-input-wrap">
           <div className="tb-input">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--t2)" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
             <input value={cdraft} onChange={e=>setCdraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){if(addItem(cdraft))setCdraft('')}}} placeholder="메모 or 잡념 입력 후 Enter…"/>
           </div>
-          {/* mobile textarea */}
           <div className="tb-mobile-input">
             <textarea value={cdraft} onChange={e=>setCdraft(e.target.value)} onKeyDown={handleMobileKey} placeholder="메모 or 잡념 입력…" rows={1}
               onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px'}}/>
@@ -807,10 +916,14 @@ function App(){
         </div>
         <span style={{fontSize:10,color:'var(--t3)',minWidth:14,textAlign:'center',flexShrink:0}}>{items.length}</span>
         <div className="tb-sep"/>
-        {notifPerm!=='granted'
-          ?<button className="notif-btn" onClick={requestNotif}>🔔 알림허용</button>
-          :<span className="notif-btn ok" title="알림 ON">🔔</span>
-        }
+        
+        <button className={`notif-btn ${notifEnabled ? 'ok' : 'off'}`} onClick={toggleNotif} title="알림 토글">
+          {notifEnabled ? '🔔 알림 ON' : '🔕 알림 OFF'}
+        </button>
+
+        <button className="ibt" onClick={()=>setShowOnboard(true)} title="사용 가이드">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </button>
         <button className="ibt gold" onClick={()=>setShowHist(true)} title="기록">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
         </button>
@@ -832,13 +945,40 @@ function App(){
 
           {/* TIMER CARD */}
           <div className={`card card-timer${flash?' flash':''}`}>
-            {/* focus mode selector */}
-            <div className="focus-modes">
-              {PRESETS.map(p=>(
-                <button key={p.min} className={`fm-btn${focusMin===p.min&&mode==='focus'?' active':focusMin===p.min&&mode==='break'?' brk-active':''}`} onClick={()=>changePreset(p.min)}>{p.label}</button>
-              ))}
-              <input className="custom-min" value={customMin} onChange={e=>setCustomMin(e.target.value)} onKeyDown={e=>e.key==='Enter'&&applyCustom()} placeholder="직접입력" title="분 단위 입력 후 Enter"/>
+            
+            {/* 수험생 모드 토글 바 */}
+            <div className="mode-toggle-row">
+              <span className="mode-toggle-label">🎓 수험생 모드 (휴식 개별 설정)</span>
+              <label className="toggle-switch">
+                <input type="checkbox" checked={examMode} onChange={e=>{
+                  setExamMode(e.target.checked);
+                  toast(e.target.checked ? '🎓 수험생 모드 ON (휴식 시간 개별 설정)' : '💡 기본 모드 ON');
+                }}/>
+                <span className="slider"></span>
+              </label>
             </div>
+
+            {/* 집중 시간 설정 */}
+            <div className="setting-section-title">🎯 집중 시간 설정</div>
+            <div className="focus-modes">
+              {FOCUS_PRESETS.map(p=>(
+                <button key={p.sec} className={`fm-btn${focusSecSetting===p.sec&&mode==='focus'?' active':''}`} onClick={()=>changeFocusPreset(p.sec)}>{p.label}</button>
+              ))}
+              <input className="custom-min" value={customFocusInput} onChange={e=>setCustomFocusInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&applyCustomFocus()} placeholder="분:초/초" title="예: 10:30 또는 90(초) 입력 후 Enter"/>
+            </div>
+
+            {/* 수험생 모드 ON일 때 나타나는 개별 휴식 시간 설정 */}
+            {examMode && (
+              <>
+                <div className="setting-section-title" style={{color:'var(--ac2)', marginTop:2}}>☕ 휴식 시간 설정 (수험생 모드)</div>
+                <div className="focus-modes">
+                  {BREAK_PRESETS.map(p=>(
+                    <button key={p.sec} className={`fm-btn${breakSecSetting===p.sec&&mode==='break'?' brk-active':''}`} onClick={()=>changeBreakPreset(p.sec)}>{p.label}</button>
+                  ))}
+                  <input className="custom-min" value={customBreakInput} onChange={e=>setCustomBreakInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&applyCustomBreak()} placeholder="분:초/초" title="예: 5:00 또는 300(초) 입력 후 Enter"/>
+                </div>
+              </>
+            )}
 
             <div className="ring-wrap">
               <svg className="ring-svg" width="160" height="160" viewBox="0 0 160 160">
@@ -846,7 +986,7 @@ function App(){
                 <circle className="ring-fg" cx="80" cy="80" r={RR} stroke={rc} strokeDasharray={CIRC} strokeDashoffset={dashOff}/>
               </svg>
               <div className="ring-time" style={{color:rc}}>{fmt(rem)}</div>
-              <div className="ring-sub">{mode==='focus'?`FOCUS · ${focusMin}분`:'BREAK'}</div>
+              <div className="ring-sub">{mode==='focus'?`FOCUS · ${fmtDuration(FS)}`:`BREAK · ${fmtDuration(BS)}`}</div>
             </div>
 
             <div className="tctrl">
@@ -881,7 +1021,6 @@ function App(){
                 <div style={{fontSize:8,color:'var(--t3)',marginTop:2}}>{history.length>0?`총 ${history.length}일 기록`:' 첫 날이에요!'}</div>
               </div>
               <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
-                <span className="auto-badge">자동초기화</span>
                 <button className="reset-btn" onClick={()=>setConfirm(true)}>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                   하루 마감
@@ -921,7 +1060,6 @@ function App(){
                 placeholder={locked?'집중 중 — 상단 입력창을 이용하세요':'메모 or 잡념을 입력하고 Enter…'}/>
             </div>
 
-            {/* FILTER TABS */}
             <div className="filter-tabs">
               <button className={`ftab${filter==='all'?' active':''}`} onClick={()=>setFilter('all')}>전체 {items.length}</button>
               {cats.map(c=>{
